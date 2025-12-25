@@ -31,37 +31,37 @@
     --muted: 220 15% 92%;
     --muted-foreground: 220 10% 45%;
 
-    /* Warm amber accent - intellectual spark */
-    --accent: 38 92% 50%;
-    --accent-foreground: 220 25% 12%;
+    /* Teal accent - scholarly & sophisticated */
+    --accent: 172 66% 40%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 15% 88%;
     --input: 220 15% 88%;
-    --ring: 38 92% 50%;
+    --ring: 172 66% 40%;
 
     --radius: 0.375rem;
 
     /* Custom tokens */
-    --amber: 38 92% 50%;
-    --amber-light: 38 92% 65%;
-    --amber-dark: 38 92% 40%;
+    --teal: 172 66% 40%;
+    --teal-light: 172 66% 50%;
+    --teal-dark: 172 66% 32%;
     --slate-warm: 220 15% 25%;
     --paper: 40 20% 98%;
     --ink: 220 25% 12%;
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(220 25% 18%) 0%, hsl(220 20% 28%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(38 92% 60%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(172 66% 40%) 0%, hsl(172 66% 50%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(40 20% 98%) 0%, hsl(220 15% 96%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(220 25% 12% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(220 25% 12% / 0.08), 0 2px 4px -2px hsl(220 25% 12% / 0.05);
     --shadow-lg: 0 10px 15px -3px hsl(220 25% 12% / 0.08), 0 4px 6px -4px hsl(220 25% 12% / 0.05);
-    --shadow-glow: 0 0 40px hsl(38 92% 50% / 0.15);
+    --shadow-glow: 0 0 40px hsl(172 66% 40% / 0.2);
 
     /* Typography */
     --font-display: 'Playfair Display', Georgia, serif;
@@ -78,7 +78,7 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 38 92% 50%;
+    --sidebar-ring: 172 66% 40%;
   }
 
   .dark {
@@ -100,15 +100,15 @@
     --muted: 220 20% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 38 92% 55%;
-    --accent-foreground: 220 25% 12%;
+    --accent: 172 66% 45%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 20% 22%;
     --input: 220 20% 22%;
-    --ring: 38 92% 55%;
+    --ring: 172 66% 45%;
 
     --gradient-hero: linear-gradient(135deg, hsl(220 25% 12%) 0%, hsl(220 20% 18%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(220 25% 8%) 0%, hsl(220 25% 10%) 100%);
@@ -120,7 +120,7 @@
     --sidebar-accent: 220 20% 15%;
     --sidebar-accent-foreground: 40 20% 95%;
     --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 38 92% 55%;
+    --sidebar-ring: 172 66% 45%;
   }
 }
 
