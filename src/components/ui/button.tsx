@@ -16,8 +16,8 @@ const buttonVariants = cva(
         ghost: "hover:bg-secondary hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         // CritiqueLab custom variants
-        accent: "bg-accent text-accent-foreground hover:bg-amber-dark shadow-sm hover:shadow-glow",
-        hero: "bg-accent text-accent-foreground font-semibold hover:bg-amber-dark shadow-md hover:shadow-glow transition-all duration-300",
+        accent: "bg-accent text-accent-foreground hover:bg-teal-dark shadow-sm hover:shadow-glow",
+        hero: "bg-accent text-accent-foreground font-semibold hover:bg-teal-dark shadow-md hover:shadow-glow transition-all duration-300",
         "hero-outline": "border-2 border-primary/20 bg-transparent text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300",
       },
       size: {
