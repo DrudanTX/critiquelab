@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -8,11 +9,100 @@ import {
   CheckCircle, 
   AlertTriangle,
   Plus,
-  Filter,
-  Search
+  Loader2
 } from "lucide-react";
+import { CritiqueResult } from "@/components/CritiqueResult";
+import { useToast } from "@/hooks/use-toast";
+
+interface CritiqueData {
+  primaryObjection: string;
+  logicalFlaws: string[];
+  weakAssumptions: string[];
+  counterarguments: string[];
+  realWorldFailures: string[];
+  argumentStrengthScore: number;
+}
 
 export default function Dashboard() {
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [critique, setCritique] = useState<CritiqueData | null>(null);
+  const { toast } = useToast();
+
+  const handleCritique = async () => {
+    if (!inputText.trim()) {
+      toast({
+        title: "No text provided",
+        description: "Please enter or paste your text to critique.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    setCritique(null);
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/critique`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: inputText }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        
+        if (response.status === 429) {
+          toast({
+            title: "Rate limit exceeded",
+            description: "Too many requests. Please try again in a moment.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (response.status === 402) {
+          toast({
+            title: "Credits exhausted",
+            description: "Please add credits to continue using AI features.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        throw new Error(errorData.error || "Failed to get critique");
+      }
+
+      const data = await response.json();
+      setCritique(data.critique);
+      
+      toast({
+        title: "Critique complete",
+        description: "Your argument has been analyzed.",
+      });
+    } catch (error) {
+      console.error("Critique error:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to analyze your text.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNewCritique = () => {
+    setInputText("");
+    setCritique(null);
+  };
+
   return (
     <Layout showFooter={false}>
       <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -27,12 +117,12 @@ export default function Dashboard() {
                 Submit your work for rigorous critique
               </p>
             </div>
-            <Button variant="hero" asChild>
-              <Link to="/dashboard">
+            {critique && (
+              <Button variant="hero" onClick={handleNewCritique}>
                 <Plus size={18} className="mr-2" />
                 New Critique
-              </Link>
-            </Button>
+              </Button>
+            )}
           </div>
 
           {/* Quick Stats */}
@@ -61,48 +151,67 @@ export default function Dashboard() {
 
           {/* Main Content Area */}
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Upload Section */}
+            {/* Upload/Result Section */}
             <div className="lg:col-span-2">
-              <div className="bg-card rounded-lg border border-border p-6 md:p-8">
-                <h2 className="font-display text-xl font-semibold text-foreground mb-6">
-                  Submit for Critique
-                </h2>
-                
-                {/* Upload Area */}
-                <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group">
-                  <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/10 transition-colors">
-                    <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
+              {critique ? (
+                <CritiqueResult critique={critique} />
+              ) : (
+                <div className="bg-card rounded-lg border border-border p-6 md:p-8">
+                  <h2 className="font-display text-xl font-semibold text-foreground mb-6">
+                    Submit for Critique
+                  </h2>
+                  
+                  {/* Upload Area */}
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 md:p-12 text-center hover:border-accent/50 transition-colors cursor-pointer group">
+                    <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 group-hover:bg-accent/10 transition-colors">
+                      <Upload className="w-8 h-8 text-muted-foreground group-hover:text-accent transition-colors" />
+                    </div>
+                    <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+                      Drop your document here
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      or click to browse files
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Supports PDF, DOCX, TXT, and Markdown files
+                    </p>
                   </div>
-                  <h3 className="font-display text-lg font-semibold text-foreground mb-2">
-                    Drop your document here
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    or click to browse files
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Supports PDF, DOCX, TXT, and Markdown files
-                  </p>
-                </div>
 
-                {/* Or paste text */}
-                <div className="mt-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-sm text-muted-foreground">or paste your text</span>
-                    <div className="h-px flex-1 bg-border" />
+                  {/* Or paste text */}
+                  <div className="mt-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="h-px flex-1 bg-border" />
+                      <span className="text-sm text-muted-foreground">or paste your text</span>
+                      <div className="h-px flex-1 bg-border" />
+                    </div>
+                    <textarea 
+                      className="w-full h-40 p-4 bg-background border border-border rounded-lg resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all"
+                      placeholder="Paste your essay, argument, or research paper here..."
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
+                      disabled={isLoading}
+                    />
                   </div>
-                  <textarea 
-                    className="w-full h-40 p-4 bg-background border border-border rounded-lg resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all"
-                    placeholder="Paste your essay, argument, or research paper here..."
-                  />
-                </div>
 
-                <div className="mt-6 flex justify-end">
-                  <Button variant="hero" size="lg" disabled>
-                    Start Critique
-                  </Button>
+                  <div className="mt-6 flex justify-end">
+                    <Button 
+                      variant="hero" 
+                      size="lg" 
+                      disabled={!inputText.trim() || isLoading}
+                      onClick={handleCritique}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Analyzing...
+                        </>
+                      ) : (
+                        "Start Critique"
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Sidebar */}
