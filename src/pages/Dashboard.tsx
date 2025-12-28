@@ -25,12 +25,16 @@ interface CritiqueData {
   argumentStrengthScore: number;
 }
 
+const FREE_CRITIQUE_LIMIT = 3;
+
 export default function Dashboard() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [critique, setCritique] = useState<CritiqueData | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [usageCount, setUsageCount] = useState(0);
+  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -51,6 +55,37 @@ export default function Dashboard() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch usage count when session is available
+  useEffect(() => {
+    const fetchUsageCount = async () => {
+      if (!session?.user?.id) {
+        setIsLoadingUsage(false);
+        return;
+      }
+      
+      try {
+        const { count, error } = await supabase
+          .from("critique_usage")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", session.user.id);
+
+        if (error) {
+          console.error("Failed to fetch usage count:", error);
+        } else {
+          setUsageCount(count ?? 0);
+        }
+      } catch (error) {
+        console.error("Error fetching usage:", error);
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    };
+
+    if (session) {
+      fetchUsageCount();
+    }
+  }, [session]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -113,6 +148,15 @@ export default function Dashboard() {
           return;
         }
         
+        if (response.status === 403) {
+          toast({
+            title: "Critique limit reached",
+            description: `You've used all ${FREE_CRITIQUE_LIMIT} free critiques. Upgrade to continue.`,
+            variant: "destructive",
+          });
+          return;
+        }
+        
         if (response.status === 429) {
           toast({
             title: "Rate limit exceeded",
@@ -136,10 +180,11 @@ export default function Dashboard() {
 
       const data = await response.json();
       setCritique(data.critique);
+      setUsageCount(data.usageCount);
       
       toast({
         title: "Critique complete",
-        description: "Your argument has been analyzed.",
+        description: `${data.remaining} critique${data.remaining === 1 ? '' : 's'} remaining.`,
       });
     } catch (error) {
       console.error("Critique error:", error);
@@ -184,23 +229,23 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <StatCard 
               icon={FileText} 
-              label="Total Submissions" 
-              value="0" 
-            />
-            <StatCard 
-              icon={Clock} 
-              label="In Progress" 
-              value="0" 
+              label="Critiques Used" 
+              value={isLoadingUsage ? "..." : String(usageCount)} 
             />
             <StatCard 
               icon={CheckCircle} 
-              label="Completed" 
-              value="0" 
+              label="Remaining" 
+              value={isLoadingUsage ? "..." : String(Math.max(0, FREE_CRITIQUE_LIMIT - usageCount))} 
+            />
+            <StatCard 
+              icon={Clock} 
+              label="Limit" 
+              value={String(FREE_CRITIQUE_LIMIT)} 
             />
             <StatCard 
               icon={AlertTriangle} 
-              label="Issues Found" 
-              value="0" 
+              label="Plan" 
+              value="Free" 
             />
           </div>
 
@@ -248,11 +293,22 @@ export default function Dashboard() {
                     />
                   </div>
 
-                  <div className="mt-6 flex justify-end">
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      {usageCount >= FREE_CRITIQUE_LIMIT ? (
+                        <span className="text-destructive font-medium">
+                          Limit reached ({usageCount}/{FREE_CRITIQUE_LIMIT})
+                        </span>
+                      ) : (
+                        <span>
+                          {FREE_CRITIQUE_LIMIT - usageCount} of {FREE_CRITIQUE_LIMIT} critiques remaining
+                        </span>
+                      )}
+                    </div>
                     <Button 
                       variant="hero" 
                       size="lg" 
-                      disabled={!inputText.trim() || isLoading}
+                      disabled={!inputText.trim() || isLoading || usageCount >= FREE_CRITIQUE_LIMIT}
                       onClick={handleCritique}
                     >
                       {isLoading ? (
@@ -260,6 +316,8 @@ export default function Dashboard() {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Analyzing...
                         </>
+                      ) : usageCount >= FREE_CRITIQUE_LIMIT ? (
+                        "Upgrade to Continue"
                       ) : (
                         "Start Critique"
                       )}
