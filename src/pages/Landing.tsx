@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Zap } from "lucide-react";
 
 export default function Landing() {
+  const navigate = useNavigate();
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -28,14 +30,20 @@ export default function Landing() {
             </p>
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up relative z-10" style={{ animationDelay: "0.3s" }}>
-              <Button variant="hero" size="xl" asChild className="touch-manipulation">
-                <Link to="/dashboard">
-                  Start Challenging
-                  <ArrowRight className="ml-2" size={20} />
-                </Link>
+              <Button 
+                variant="hero" 
+                size="xl" 
+                onClick={() => navigate("/dashboard")}
+              >
+                Start Challenging
+                <ArrowRight className="ml-2" size={20} />
               </Button>
-              <Button variant="hero-outline" size="xl" asChild className="touch-manipulation">
-                <Link to="/pricing">View Pricing</Link>
+              <Button 
+                variant="hero-outline" 
+                size="xl" 
+                onClick={() => navigate("/pricing")}
+              >
+                View Pricing
               </Button>
             </div>
           </div>
@@ -138,21 +146,19 @@ export default function Landing() {
             <Button 
               variant="accent" 
               size="xl" 
-              className="shadow-lg touch-manipulation"
-              asChild
+              className="shadow-lg"
+              onClick={() => navigate("/dashboard")}
             >
-              <Link to="/dashboard">
-                Get Started Free
-                <ArrowRight className="ml-2" size={20} />
-              </Link>
+              Get Started Free
+              <ArrowRight className="ml-2" size={20} />
             </Button>
             <Button 
               variant="outline" 
               size="xl"
-              className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 touch-manipulation"
-              asChild
+              className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+              onClick={() => navigate("/trust")}
             >
-              <Link to="/trust">Learn About Our Standards</Link>
+              Learn About Our Standards
             </Button>
           </div>
         </div>
