@@ -27,23 +27,23 @@ export default function Landing() {
               CritiqueLab is an adversarial AI platform that rigorously challenges your essays, research papers, and arguments—helping you strengthen your work before others find the flaws.
             </p>
             
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-              <Button variant="hero" size="xl" asChild>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up relative z-10" style={{ animationDelay: "0.3s" }}>
+              <Button variant="hero" size="xl" asChild className="touch-manipulation">
                 <Link to="/dashboard">
                   Start Challenging
                   <ArrowRight className="ml-2" size={20} />
                 </Link>
               </Button>
-              <Button variant="hero-outline" size="xl" asChild>
+              <Button variant="hero-outline" size="xl" asChild className="touch-manipulation">
                 <Link to="/pricing">View Pricing</Link>
               </Button>
             </div>
           </div>
         </div>
         
-        {/* Decorative elements */}
-        <div className="absolute top-1/4 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        {/* Decorative elements - pointer-events-none to prevent touch interception */}
+        <div className="absolute top-1/4 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       </section>
 
       {/* Features Section */}
@@ -134,11 +134,11 @@ export default function Landing() {
           <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-10">
             Join researchers, academics, and critical thinkers who use CritiqueLab to produce their best work.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
             <Button 
               variant="accent" 
               size="xl" 
-              className="shadow-lg"
+              className="shadow-lg touch-manipulation"
               asChild
             >
               <Link to="/dashboard">
@@ -149,7 +149,7 @@ export default function Landing() {
             <Button 
               variant="outline" 
               size="xl"
-              className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+              className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 touch-manipulation"
               asChild
             >
               <Link to="/trust">Learn About Our Standards</Link>
