@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const FREE_CRITIQUE_LIMIT = 3;
+
 const ADVERSARIAL_SYSTEM_PROMPT = `You are a ruthless devil's advocate and adversarial critic. Your sole purpose is to find weaknesses, expose flaws, and construct the strongest possible opposing arguments.
 
 RULES:
@@ -60,6 +62,35 @@ serve(async (req) => {
     }
 
     console.log("Authenticated user:", user.id);
+
+    // Check user's critique usage count
+    const { count, error: countError } = await supabase
+      .from("critique_usage")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (countError) {
+      console.error("Failed to check usage count:", countError);
+      return new Response(
+        JSON.stringify({ error: "Failed to check usage limits" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const usageCount = count ?? 0;
+    console.log("User usage count:", usageCount);
+
+    if (usageCount >= FREE_CRITIQUE_LIMIT) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Free critique limit reached", 
+          usageCount,
+          limit: FREE_CRITIQUE_LIMIT 
+        }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { text } = await req.json();
 
     if (!text || typeof text !== "string" || text.trim().length === 0) {
@@ -141,17 +172,32 @@ serve(async (req) => {
       }
     } catch (parseError) {
       console.error("Failed to parse AI response as JSON:", parseError);
-      // Return a structured error response
       return new Response(
         JSON.stringify({ error: "Failed to parse critique response" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Parsed critique:", JSON.stringify(critique));
+    // Record the usage
+    const { error: insertError } = await supabase
+      .from("critique_usage")
+      .insert({ user_id: user.id });
+
+    if (insertError) {
+      console.error("Failed to record usage:", insertError);
+      // Don't fail the request, just log the error
+    }
+
+    const newUsageCount = usageCount + 1;
+    console.log("Parsed critique, new usage count:", newUsageCount);
 
     return new Response(
-      JSON.stringify({ critique }),
+      JSON.stringify({ 
+        critique, 
+        usageCount: newUsageCount,
+        limit: FREE_CRITIQUE_LIMIT,
+        remaining: FREE_CRITIQUE_LIMIT - newUsageCount
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
