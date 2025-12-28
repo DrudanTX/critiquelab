@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import { 
   Upload, 
   FileText, 
@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Session } from "@supabase/supabase-js";
 
 interface CritiqueData {
   primaryObjection: string;
@@ -27,7 +29,40 @@ export default function Dashboard() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [critique, setCritique] = useState<CritiqueData | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setIsAuthLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!isAuthLoading && !session) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to access the dashboard.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+    }
+  }, [isAuthLoading, session, navigate, toast]);
 
   const handleCritique = async () => {
     if (!inputText.trim()) {
@@ -36,6 +71,16 @@ export default function Dashboard() {
         description: "Please enter or paste your text to critique.",
         variant: "destructive",
       });
+      return;
+    }
+
+    if (!session?.access_token) {
+      toast({
+        title: "Session expired",
+        description: "Please log in again.",
+        variant: "destructive",
+      });
+      navigate("/auth");
       return;
     }
 
@@ -49,7 +94,7 @@ export default function Dashboard() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ text: inputText }),
         }
@@ -57,6 +102,16 @@ export default function Dashboard() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        if (response.status === 401) {
+          toast({
+            title: "Session expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+          navigate("/auth");
+          return;
+        }
         
         if (response.status === 429) {
           toast({
