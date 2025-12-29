@@ -25,13 +25,37 @@ interface CritiqueData {
   argumentStrengthScore: number;
 }
 
+interface SavedCritiqueRaw {
+  id: string;
+  input_text: string;
+  primary_objection: string;
+  logical_flaws: unknown;
+  weak_assumptions: unknown;
+  counterarguments: unknown;
+  real_world_failures: unknown;
+  argument_strength_score: number;
+  created_at: string;
+}
+
 interface SavedCritique {
   id: string;
   input_text: string;
   primary_objection: string;
+  logical_flaws: string[];
+  weak_assumptions: string[];
+  counterarguments: string[];
+  real_world_failures: string[];
   argument_strength_score: number;
   created_at: string;
 }
+
+const parseSavedCritique = (raw: SavedCritiqueRaw): SavedCritique => ({
+  ...raw,
+  logical_flaws: Array.isArray(raw.logical_flaws) ? raw.logical_flaws as string[] : [],
+  weak_assumptions: Array.isArray(raw.weak_assumptions) ? raw.weak_assumptions as string[] : [],
+  counterarguments: Array.isArray(raw.counterarguments) ? raw.counterarguments as string[] : [],
+  real_world_failures: Array.isArray(raw.real_world_failures) ? raw.real_world_failures as string[] : [],
+});
 
 const FREE_CRITIQUE_LIMIT = 3;
 
@@ -45,6 +69,7 @@ export default function Dashboard() {
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
   const [savedCritiques, setSavedCritiques] = useState<SavedCritique[]>([]);
   const [currentInputText, setCurrentInputText] = useState("");
+  const [isViewingHistory, setIsViewingHistory] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -90,15 +115,15 @@ export default function Dashboard() {
         // Fetch saved critiques
         const { data: critiques, error: critiquesError } = await supabase
           .from("saved_critiques")
-          .select("id, input_text, primary_objection, argument_strength_score, created_at")
+          .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
           .eq("user_id", session.user.id)
           .order("created_at", { ascending: false })
           .limit(5);
 
         if (critiquesError) {
           console.error("Failed to fetch saved critiques:", critiquesError);
-        } else {
-          setSavedCritiques(critiques || []);
+        } else if (critiques) {
+          setSavedCritiques(critiques.map(c => parseSavedCritique(c as SavedCritiqueRaw)));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -222,13 +247,13 @@ export default function Dashboard() {
             real_world_failures: data.critique.realWorldFailures,
             argument_strength_score: data.critique.argumentStrengthScore,
           })
-          .select("id, input_text, primary_objection, argument_strength_score, created_at")
+          .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
           .single();
 
         if (saveError) {
           console.error("Failed to save critique:", saveError);
         } else if (savedData) {
-          setSavedCritiques(prev => [savedData, ...prev.slice(0, 4)]);
+          setSavedCritiques(prev => [parseSavedCritique(savedData as SavedCritiqueRaw), ...prev.slice(0, 4)]);
         }
       }
       
@@ -252,6 +277,20 @@ export default function Dashboard() {
     setInputText("");
     setCritique(null);
     setCurrentInputText("");
+    setIsViewingHistory(false);
+  };
+
+  const handleViewSavedCritique = (saved: SavedCritique) => {
+    setCritique({
+      primaryObjection: saved.primary_objection,
+      logicalFlaws: saved.logical_flaws,
+      weakAssumptions: saved.weak_assumptions,
+      counterarguments: saved.counterarguments,
+      realWorldFailures: saved.real_world_failures,
+      argumentStrengthScore: saved.argument_strength_score,
+    });
+    setCurrentInputText(saved.input_text);
+    setIsViewingHistory(true);
   };
 
   return (
@@ -388,18 +427,19 @@ export default function Dashboard() {
                 {savedCritiques.length > 0 ? (
                   <div className="space-y-3">
                     {savedCritiques.map((saved) => (
-                      <div 
+                      <button 
                         key={saved.id}
-                        className="p-3 bg-secondary/50 rounded-lg border border-border/50"
+                        onClick={() => handleViewSavedCritique(saved)}
+                        className="w-full text-left p-3 bg-secondary/50 rounded-lg border border-border/50 hover:bg-secondary hover:border-accent/30 transition-colors cursor-pointer"
                       >
                         <p className="text-sm text-foreground line-clamp-2 mb-2">
-                          {saved.input_text.slice(0, 100)}...
+                          {saved.input_text.slice(0, 100)}{saved.input_text.length > 100 ? '...' : ''}
                         </p>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>Score: {saved.argument_strength_score}/100</span>
                           <span>{new Date(saved.created_at).toLocaleDateString()}</span>
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (
