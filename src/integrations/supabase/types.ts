@@ -32,6 +32,45 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_critiques: {
+        Row: {
+          argument_strength_score: number
+          counterarguments: Json
+          created_at: string
+          id: string
+          input_text: string
+          logical_flaws: Json
+          primary_objection: string
+          real_world_failures: Json
+          user_id: string
+          weak_assumptions: Json
+        }
+        Insert: {
+          argument_strength_score: number
+          counterarguments?: Json
+          created_at?: string
+          id?: string
+          input_text: string
+          logical_flaws?: Json
+          primary_objection: string
+          real_world_failures?: Json
+          user_id: string
+          weak_assumptions?: Json
+        }
+        Update: {
+          argument_strength_score?: number
+          counterarguments?: Json
+          created_at?: string
+          id?: string
+          input_text?: string
+          logical_flaws?: Json
+          primary_objection?: string
+          real_world_failures?: Json
+          user_id?: string
+          weak_assumptions?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

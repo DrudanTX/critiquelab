@@ -25,6 +25,14 @@ interface CritiqueData {
   argumentStrengthScore: number;
 }
 
+interface SavedCritique {
+  id: string;
+  input_text: string;
+  primary_objection: string;
+  argument_strength_score: number;
+  created_at: string;
+}
+
 const FREE_CRITIQUE_LIMIT = 3;
 
 export default function Dashboard() {
@@ -35,6 +43,8 @@ export default function Dashboard() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [usageCount, setUsageCount] = useState(0);
   const [isLoadingUsage, setIsLoadingUsage] = useState(true);
+  const [savedCritiques, setSavedCritiques] = useState<SavedCritique[]>([]);
+  const [currentInputText, setCurrentInputText] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -56,34 +66,49 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch usage count when session is available
+  // Fetch usage count and saved critiques when session is available
   useEffect(() => {
-    const fetchUsageCount = async () => {
+    const fetchData = async () => {
       if (!session?.user?.id) {
         setIsLoadingUsage(false);
         return;
       }
       
       try {
-        const { count, error } = await supabase
+        // Fetch usage count
+        const { count, error: countError } = await supabase
           .from("critique_usage")
           .select("*", { count: "exact", head: true })
           .eq("user_id", session.user.id);
 
-        if (error) {
-          console.error("Failed to fetch usage count:", error);
+        if (countError) {
+          console.error("Failed to fetch usage count:", countError);
         } else {
           setUsageCount(count ?? 0);
         }
+
+        // Fetch saved critiques
+        const { data: critiques, error: critiquesError } = await supabase
+          .from("saved_critiques")
+          .select("id, input_text, primary_objection, argument_strength_score, created_at")
+          .eq("user_id", session.user.id)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (critiquesError) {
+          console.error("Failed to fetch saved critiques:", critiquesError);
+        } else {
+          setSavedCritiques(critiques || []);
+        }
       } catch (error) {
-        console.error("Error fetching usage:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoadingUsage(false);
       }
     };
 
     if (session) {
-      fetchUsageCount();
+      fetchData();
     }
   }, [session]);
 
@@ -121,6 +146,7 @@ export default function Dashboard() {
 
     setIsLoading(true);
     setCritique(null);
+    setCurrentInputText(inputText);
 
     try {
       const response = await fetch(
@@ -182,6 +208,30 @@ export default function Dashboard() {
       setCritique(data.critique);
       setUsageCount(data.usageCount);
       
+      // Save the critique to the database
+      if (session?.user?.id) {
+        const { data: savedData, error: saveError } = await supabase
+          .from("saved_critiques")
+          .insert({
+            user_id: session.user.id,
+            input_text: inputText,
+            primary_objection: data.critique.primaryObjection,
+            logical_flaws: data.critique.logicalFlaws,
+            weak_assumptions: data.critique.weakAssumptions,
+            counterarguments: data.critique.counterarguments,
+            real_world_failures: data.critique.realWorldFailures,
+            argument_strength_score: data.critique.argumentStrengthScore,
+          })
+          .select("id, input_text, primary_objection, argument_strength_score, created_at")
+          .single();
+
+        if (saveError) {
+          console.error("Failed to save critique:", saveError);
+        } else if (savedData) {
+          setSavedCritiques(prev => [savedData, ...prev.slice(0, 4)]);
+        }
+      }
+      
       toast({
         title: "Critique complete",
         description: `${data.remaining} critique${data.remaining === 1 ? '' : 's'} remaining.`,
@@ -201,6 +251,7 @@ export default function Dashboard() {
   const handleNewCritique = () => {
     setInputText("");
     setCritique(null);
+    setCurrentInputText("");
   };
 
   return (
@@ -334,17 +385,36 @@ export default function Dashboard() {
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4">
                   Recent Critiques
                 </h3>
-                <div className="text-center py-8">
-                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                    <FileText className="w-6 h-6 text-muted-foreground" />
+                {savedCritiques.length > 0 ? (
+                  <div className="space-y-3">
+                    {savedCritiques.map((saved) => (
+                      <div 
+                        key={saved.id}
+                        className="p-3 bg-secondary/50 rounded-lg border border-border/50"
+                      >
+                        <p className="text-sm text-foreground line-clamp-2 mb-2">
+                          {saved.input_text.slice(0, 100)}...
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>Score: {saved.argument_strength_score}/100</span>
+                          <span>{new Date(saved.created_at).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    No critiques yet
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Submit your first document to get started
-                  </p>
-                </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
+                      <FileText className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      No critiques yet
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Submit your first document to get started
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Quick Tips */}

@@ -139,6 +139,43 @@ export default function Auth() {
     }
   };
 
+  // Check if already logged in
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsAlreadyLoggedIn(true);
+      }
+    });
+  }, []);
+
+  if (isAlreadyLoggedIn) {
+    return (
+      <Layout>
+        <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
+          <div className="w-full max-w-md">
+            <div className="bg-card rounded-lg border border-border p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-4">
+                <ArrowRight className="w-8 h-8 text-accent" />
+              </div>
+              <h1 className="text-2xl font-display font-bold text-foreground mb-2">
+                Already Signed In
+              </h1>
+              <p className="text-muted-foreground mb-6">
+                You're already logged in to your account.
+              </p>
+              <Button variant="hero" onClick={() => navigate("/dashboard")} className="w-full">
+                Go to Dashboard
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
