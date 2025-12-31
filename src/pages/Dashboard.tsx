@@ -159,9 +159,9 @@ export default function Dashboard() {
       return;
     }
 
-    const { data: { session: freshSession } } = await supabase.auth.getSession();
+    const { data: { session: existingSession } } = await supabase.auth.getSession();
 
-    if (!freshSession) {
+    if (!existingSession) {
       toast({
         title: "Session expired",
         description: "Please log in again.",
@@ -170,6 +170,34 @@ export default function Dashboard() {
       navigate("/auth");
       return;
     }
+
+    const { data: { session: freshSession }, error: refreshError } = await supabase.auth.refreshSession();
+
+    if (refreshError || !freshSession) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Session expired",
+        description: "Please log in again.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      await supabase.auth.signOut();
+      toast({
+        title: "Session expired",
+        description: "Please log in again.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    const userId = user.id;
 
     setIsLoading(true);
     setCritique(null);
@@ -228,11 +256,11 @@ export default function Dashboard() {
       setUsageCount(result.usageCount);
 
       // Save the critique to the database
-      if (freshSession?.user?.id) {
+      if (userId) {
         const { data: savedData, error: saveError } = await supabase
           .from("saved_critiques")
           .insert({
-            user_id: freshSession.user.id,
+            user_id: userId,
             input_text: inputText,
             primary_objection: result.critique.primaryObjection,
             logical_flaws: result.critique.logicalFlaws,
