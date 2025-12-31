@@ -34,14 +34,27 @@ export default function Auth() {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsAlreadyLoggedIn(true);
+    supabase.auth.getUser().then(async ({ data: { user }, error }) => {
+      if (error) {
+        await supabase.auth.signOut();
+        setIsAlreadyLoggedIn(false);
+        return;
       }
+
+      setIsAlreadyLoggedIn(!!user);
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setIsAlreadyLoggedIn(false);
+    toast({
+      title: "Signed out",
+      description: "Please sign in again.",
+    });
+  };
 
   const validateInputs = () => {
     const newErrors: { email?: string; password?: string } = {};
@@ -157,10 +170,15 @@ export default function Auth() {
               <p className="text-muted-foreground mb-6">
                 You're already logged in to your account.
               </p>
-              <Button variant="hero" onClick={() => navigate("/dashboard")} className="w-full">
-                Go to Dashboard
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="space-y-2">
+                <Button variant="hero" onClick={() => navigate("/dashboard")} className="w-full">
+                  Go to Dashboard
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={handleSignOut} className="w-full">
+                  Sign out
+                </Button>
+              </div>
             </div>
           </div>
         </div>
