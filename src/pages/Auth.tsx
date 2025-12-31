@@ -18,22 +18,25 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if already logged in
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
-          navigate("/dashboard");
-        }
+    // Keep auth state in sync (but only redirect after an explicit sign-in)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) {
+        navigate("/dashboard");
       }
-    );
+
+      if (event === "SIGNED_OUT") {
+        setIsAlreadyLoggedIn(false);
+      }
+    });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        setIsAlreadyLoggedIn(true);
       }
     });
 
@@ -138,17 +141,6 @@ export default function Auth() {
       setIsLoading(false);
     }
   };
-
-  // Check if already logged in
-  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsAlreadyLoggedIn(true);
-      }
-    });
-  }, []);
 
   if (isAlreadyLoggedIn) {
     return (
