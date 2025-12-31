@@ -159,7 +159,9 @@ export default function Dashboard() {
       return;
     }
 
-    if (!session?.access_token) {
+    const { data: { session: freshSession } } = await supabase.auth.getSession();
+
+    if (!freshSession) {
       toast({
         title: "Session expired",
         description: "Please log in again.",
@@ -174,22 +176,14 @@ export default function Dashboard() {
     setCurrentInputText(inputText);
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/critique`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ text: inputText }),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke("critique", {
+        body: { text: inputText },
+      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        
-        if (response.status === 401) {
+      if (error) {
+        const status = (error as any)?.context?.status ?? (error as any)?.status;
+
+        if (status === 401) {
           toast({
             title: "Session expired",
             description: "Please log in again.",
@@ -198,8 +192,8 @@ export default function Dashboard() {
           navigate("/auth");
           return;
         }
-        
-        if (response.status === 403) {
+
+        if (status === 403) {
           toast({
             title: "Critique limit reached",
             description: `You've used all ${FREE_CRITIQUE_LIMIT} free critiques. Upgrade to continue.`,
@@ -207,8 +201,8 @@ export default function Dashboard() {
           });
           return;
         }
-        
-        if (response.status === 429) {
+
+        if (status === 429) {
           toast({
             title: "Rate limit exceeded",
             description: "Too many requests. Please try again in a moment.",
@@ -216,8 +210,8 @@ export default function Dashboard() {
           });
           return;
         }
-        
-        if (response.status === 402) {
+
+        if (status === 402) {
           toast({
             title: "Credits exhausted",
             description: "Please add credits to continue using AI features.",
@@ -226,26 +220,26 @@ export default function Dashboard() {
           return;
         }
 
-        throw new Error(errorData.error || "Failed to get critique");
+        throw error;
       }
 
-      const data = await response.json();
-      setCritique(data.critique);
-      setUsageCount(data.usageCount);
-      
+      const result = data as any;
+      setCritique(result.critique);
+      setUsageCount(result.usageCount);
+
       // Save the critique to the database
-      if (session?.user?.id) {
+      if (freshSession?.user?.id) {
         const { data: savedData, error: saveError } = await supabase
           .from("saved_critiques")
           .insert({
-            user_id: session.user.id,
+            user_id: freshSession.user.id,
             input_text: inputText,
-            primary_objection: data.critique.primaryObjection,
-            logical_flaws: data.critique.logicalFlaws,
-            weak_assumptions: data.critique.weakAssumptions,
-            counterarguments: data.critique.counterarguments,
-            real_world_failures: data.critique.realWorldFailures,
-            argument_strength_score: data.critique.argumentStrengthScore,
+            primary_objection: result.critique.primaryObjection,
+            logical_flaws: result.critique.logicalFlaws,
+            weak_assumptions: result.critique.weakAssumptions,
+            counterarguments: result.critique.counterarguments,
+            real_world_failures: result.critique.realWorldFailures,
+            argument_strength_score: result.critique.argumentStrengthScore,
           })
           .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
           .single();
@@ -253,13 +247,13 @@ export default function Dashboard() {
         if (saveError) {
           console.error("Failed to save critique:", saveError);
         } else if (savedData) {
-          setSavedCritiques(prev => [parseSavedCritique(savedData as SavedCritiqueRaw), ...prev.slice(0, 4)]);
+          setSavedCritiques((prev) => [parseSavedCritique(savedData as SavedCritiqueRaw), ...prev.slice(0, 4)]);
         }
       }
-      
+
       toast({
         title: "Critique complete",
-        description: `${data.remaining} critique${data.remaining === 1 ? '' : 's'} remaining.`,
+        description: `${result.remaining} critique${result.remaining === 1 ? "" : "s"} remaining.`,
       });
     } catch (error) {
       console.error("Critique error:", error);

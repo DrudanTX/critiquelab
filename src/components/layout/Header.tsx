@@ -47,7 +47,7 @@ export function Header() {
         {/* CTA Button */}
         <div className="hidden md:flex items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/dashboard">Sign In</Link>
+            <Link to="/auth">Sign In</Link>
           </Button>
           <Button variant="accent" size="sm" asChild>
             <Link to="/dashboard">Get Started</Link>
@@ -84,7 +84,7 @@ export function Header() {
             ))}
             <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
               <Button variant="outline" asChild>
-                <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
                   Sign In
                 </Link>
               </Button>
