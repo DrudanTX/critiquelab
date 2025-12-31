@@ -9,12 +9,28 @@ import {
   CheckCircle, 
   AlertTriangle,
   Plus,
-  Loader2
+  Loader2,
+  ChevronDown
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type Persona = "free" | "pro_general" | "pro_business";
+
+const PERSONA_OPTIONS: { value: Persona; label: string; description: string }[] = [
+  { value: "free", label: "Relentless Reviewer", description: "Strict grader — clarity, logic, structure" },
+  { value: "pro_general", label: "Hostile Expert", description: "Expert-level scrutiny — methodology, implications" },
+  { value: "pro_business", label: "Unforgiving Investor", description: "Skeptical VC — market, moat, execution" },
+];
 
 interface CritiqueData {
   primaryObjection: string;
@@ -70,6 +86,7 @@ export default function Dashboard() {
   const [savedCritiques, setSavedCritiques] = useState<SavedCritique[]>([]);
   const [currentInputText, setCurrentInputText] = useState("");
   const [isViewingHistory, setIsViewingHistory] = useState(false);
+  const [selectedPersona, setSelectedPersona] = useState<Persona>("free");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -205,7 +222,7 @@ export default function Dashboard() {
 
     try {
       const { data, error } = await supabase.functions.invoke("critique", {
-        body: { text: inputText },
+        body: { text: inputText, persona: selectedPersona },
       });
 
       if (error) {
@@ -403,6 +420,36 @@ export default function Dashboard() {
                       onChange={(e) => setInputText(e.target.value)}
                       disabled={isLoading}
                     />
+                  </div>
+
+                  {/* Persona Selector */}
+                  <div className="mt-6">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Critique Mode
+                    </label>
+                    <Select 
+                      value={selectedPersona} 
+                      onValueChange={(value) => setSelectedPersona(value as Persona)}
+                      disabled={isLoading}
+                    >
+                      <SelectTrigger className="w-full bg-background border-border">
+                        <SelectValue placeholder="Select critique mode" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-border z-50">
+                        {PERSONA_OPTIONS.map((option) => (
+                          <SelectItem 
+                            key={option.value} 
+                            value={option.value}
+                            className="cursor-pointer"
+                          >
+                            <div className="flex flex-col items-start">
+                              <span className="font-medium">{option.label}</span>
+                              <span className="text-xs text-muted-foreground">{option.description}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="mt-6 flex items-center justify-between">
