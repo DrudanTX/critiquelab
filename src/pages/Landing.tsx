@@ -22,7 +22,7 @@ export default function Landing() {
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
               Challenge Your Ideas.{" "}
-              <span className="text-gradient">Prove Me Wrong.</span>
+              <span className="text-gradient">Made to Prove You Wrong.</span>
             </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
