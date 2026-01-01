@@ -15,7 +15,7 @@ import { CritiqueResult } from "@/components/CritiqueResult";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-import { PersonaSelector, Persona, UserTier, getDefaultPersonaForTier } from "@/components/PersonaSelector";
+import { PersonaSelector, Persona, getDefaultPersona } from "@/components/PersonaSelector";
 
 interface CritiqueData {
   primaryObjection: string;
@@ -58,7 +58,7 @@ const parseSavedCritique = (raw: SavedCritiqueRaw): SavedCritique => ({
   real_world_failures: Array.isArray(raw.real_world_failures) ? raw.real_world_failures as string[] : [],
 });
 
-const FREE_CRITIQUE_LIMIT = 3;
+// Site is now free - no limits
 
 export default function Dashboard() {
   const [inputText, setInputText] = useState("");
@@ -71,9 +71,7 @@ export default function Dashboard() {
   const [savedCritiques, setSavedCritiques] = useState<SavedCritique[]>([]);
   const [currentInputText, setCurrentInputText] = useState("");
   const [isViewingHistory, setIsViewingHistory] = useState(false);
-  // TODO: Determine actual user tier from subscription status
-  const [userTier] = useState<UserTier>("free");
-  const [selectedPersona, setSelectedPersona] = useState<Persona>(() => getDefaultPersonaForTier("free"));
+  const [selectedPersona, setSelectedPersona] = useState<Persona>(() => getDefaultPersona());
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -225,14 +223,6 @@ export default function Dashboard() {
           return;
         }
 
-        if (status === 403) {
-          toast({
-            title: "Critique limit reached",
-            description: `You've used all ${FREE_CRITIQUE_LIMIT} free critiques. Upgrade to continue.`,
-            variant: "destructive",
-          });
-          return;
-        }
 
         if (status === 429) {
           toast({
@@ -342,24 +332,14 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 gap-4 mb-8">
             <StatCard 
               icon={FileText} 
-              label="Critiques Used" 
+              label="Total Critiques" 
               value={isLoadingUsage ? "..." : String(usageCount)} 
             />
             <StatCard 
               icon={CheckCircle} 
-              label="Remaining" 
-              value={isLoadingUsage ? "..." : String(Math.max(0, FREE_CRITIQUE_LIMIT - usageCount))} 
-            />
-            <StatCard 
-              icon={Clock} 
-              label="Limit" 
-              value={String(FREE_CRITIQUE_LIMIT)} 
-            />
-            <StatCard 
-              icon={AlertTriangle} 
               label="Plan" 
               value="Free" 
             />
@@ -414,27 +394,15 @@ export default function Dashboard() {
                     <PersonaSelector
                       selectedPersona={selectedPersona}
                       onSelectPersona={setSelectedPersona}
-                      userTier={userTier}
                       disabled={isLoading}
                     />
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      {usageCount >= FREE_CRITIQUE_LIMIT ? (
-                        <span className="text-destructive font-medium">
-                          Limit reached ({usageCount}/{FREE_CRITIQUE_LIMIT})
-                        </span>
-                      ) : (
-                        <span>
-                          {FREE_CRITIQUE_LIMIT - usageCount} of {FREE_CRITIQUE_LIMIT} critiques remaining
-                        </span>
-                      )}
-                    </div>
+                  <div className="mt-6 flex justify-end">
                     <Button 
                       variant="hero" 
                       size="lg" 
-                      disabled={!inputText.trim() || isLoading || usageCount >= FREE_CRITIQUE_LIMIT}
+                      disabled={!inputText.trim() || isLoading}
                       onClick={handleCritique}
                     >
                       {isLoading ? (
@@ -442,8 +410,6 @@ export default function Dashboard() {
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           Analyzing...
                         </>
-                      ) : usageCount >= FREE_CRITIQUE_LIMIT ? (
-                        "Upgrade to Continue"
                       ) : (
                         "Start Critique"
                       )}
