@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const FREE_CRITIQUE_LIMIT = 3;
+// Site is now free - no usage limits
 
 const BASE_SYSTEM_PROMPT = `You are CritiqueLab, an adversarial AI designed to intellectually attack user-submitted work.
 
@@ -220,33 +220,14 @@ serve(async (req) => {
 
     console.log("Authenticated user:", user.id);
 
-    // Check user's critique usage count
-    const { count, error: countError } = await supabase
+    // Get usage count for tracking (no limits)
+    const { count } = await supabase
       .from("critique_usage")
       .select("*", { count: "exact", head: true })
       .eq("user_id", user.id);
 
-    if (countError) {
-      console.error("Failed to check usage count:", countError);
-      return new Response(
-        JSON.stringify({ error: "Failed to check usage limits" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const usageCount = count ?? 0;
     console.log("User usage count:", usageCount);
-
-    if (usageCount >= FREE_CRITIQUE_LIMIT) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Free critique limit reached", 
-          usageCount,
-          limit: FREE_CRITIQUE_LIMIT 
-        }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
 
     const { text, persona = "free" } = await req.json();
 
@@ -355,9 +336,7 @@ serve(async (req) => {
       JSON.stringify({ 
         critique, 
         persona,
-        usageCount: newUsageCount,
-        limit: FREE_CRITIQUE_LIMIT,
-        remaining: FREE_CRITIQUE_LIMIT - newUsageCount
+        usageCount: newUsageCount
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
