@@ -262,7 +262,7 @@ export default function Dashboard() {
           weakAssumptions: [],
           counterarguments: [],
           realWorldFailures: rawCritique.whatWouldBreakThis || [],
-          argumentStrengthScore: 0, // Demo doesn't score
+          argumentStrengthScore: rawCritique.argumentStrengthScore || 5,
           coreClaimUnderFire: rawCritique.coreClaimUnderFire,
           obviousWeaknesses: rawCritique.obviousWeaknesses,
           whatWouldBreakThis: rawCritique.whatWouldBreakThis,

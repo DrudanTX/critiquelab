@@ -67,13 +67,14 @@ You MUST respond with this exact JSON structure:
   "coreClaimUnderFire": "The central claim you're attacking",
   "obviousWeaknesses": ["Array of obvious weaknesses found"],
   "whatWouldBreakThis": ["Array of scenarios that would break this argument"],
+  "argumentStrengthScore": <number 1-10, scores above 7 are rare>,
   "closingStatement": "End with 'Prove me wrong.'"
 }
 
 Rules:
-- No scoring
+- Scores above 7 are rare
 - No academic jargon
-- Max ~250 words total`;
+- Max ~300 words total`;
 
 const FREE_PERSONA = `
 ================================================
