@@ -24,6 +24,10 @@ interface CritiqueData {
   counterarguments: string[];
   realWorldFailures: string[];
   argumentStrengthScore: number;
+  // Demo persona fields
+  coreClaimUnderFire?: string;
+  obviousWeaknesses?: string[];
+  whatWouldBreakThis?: string[];
 }
 
 interface SavedCritiqueRaw {
@@ -246,22 +250,43 @@ export default function Dashboard() {
       }
 
       const result = data as any;
-      setCritique(result.critique);
+      const rawCritique = result.critique;
+      const persona = result.persona;
+      
+      // Normalize demo persona response to standard format
+      let normalizedCritique: CritiqueData;
+      if (persona === "demo") {
+        normalizedCritique = {
+          primaryObjection: rawCritique.coreClaimUnderFire || "No core claim identified",
+          logicalFlaws: [],
+          weakAssumptions: [],
+          counterarguments: [],
+          realWorldFailures: rawCritique.whatWouldBreakThis || [],
+          argumentStrengthScore: 0, // Demo doesn't score
+          coreClaimUnderFire: rawCritique.coreClaimUnderFire,
+          obviousWeaknesses: rawCritique.obviousWeaknesses,
+          whatWouldBreakThis: rawCritique.whatWouldBreakThis,
+        };
+      } else {
+        normalizedCritique = rawCritique;
+      }
+      
+      setCritique(normalizedCritique);
       setUsageCount(result.usageCount);
 
-      // Save the critique to the database
-      if (userId) {
+      // Save the critique to the database (only for non-demo personas that have full data)
+      if (userId && persona !== "demo") {
         const { data: savedData, error: saveError } = await supabase
           .from("saved_critiques")
           .insert({
             user_id: userId,
             input_text: inputText,
-            primary_objection: result.critique.primaryObjection,
-            logical_flaws: result.critique.logicalFlaws,
-            weak_assumptions: result.critique.weakAssumptions,
-            counterarguments: result.critique.counterarguments,
-            real_world_failures: result.critique.realWorldFailures,
-            argument_strength_score: result.critique.argumentStrengthScore,
+            primary_objection: normalizedCritique.primaryObjection,
+            logical_flaws: normalizedCritique.logicalFlaws,
+            weak_assumptions: normalizedCritique.weakAssumptions,
+            counterarguments: normalizedCritique.counterarguments,
+            real_world_failures: normalizedCritique.realWorldFailures,
+            argument_strength_score: normalizedCritique.argumentStrengthScore,
           })
           .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
           .single();
