@@ -1,4 +1,4 @@
-import { AlertTriangle, Target, Brain, Shield, Globe, Gauge } from "lucide-react";
+import { AlertTriangle, Target, Brain, Shield, Globe, Gauge, Eye, Crosshair } from "lucide-react";
 
 interface CritiqueData {
   primaryObjection: string;
@@ -7,6 +7,10 @@ interface CritiqueData {
   counterarguments: string[];
   realWorldFailures: string[];
   argumentStrengthScore: number;
+  // Demo persona fields
+  coreClaimUnderFire?: string;
+  obviousWeaknesses?: string[];
+  whatWouldBreakThis?: string[];
 }
 
 interface CritiqueResultProps {
@@ -19,6 +23,63 @@ export function CritiqueResult({ critique }: CritiqueResultProps) {
     if (score <= 6) return "text-amber-500";
     return "text-accent";
   };
+
+  // Check if this is a demo persona result (has demo-specific fields and no score)
+  const isDemoResult = critique.coreClaimUnderFire && critique.obviousWeaknesses;
+
+  if (isDemoResult) {
+    return (
+      <div className="space-y-6">
+        {/* Core Claim Under Fire */}
+        <CritiqueSection
+          icon={Target}
+          title="Core Claim Under Fire"
+          iconColor="text-destructive"
+        >
+          <p className="text-foreground">{critique.coreClaimUnderFire}</p>
+        </CritiqueSection>
+
+        {/* Obvious Weaknesses */}
+        <CritiqueSection
+          icon={Eye}
+          title="Obvious Weaknesses"
+          iconColor="text-amber-500"
+        >
+          <ul className="space-y-2">
+            {critique.obviousWeaknesses?.map((weakness, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="text-muted-foreground mt-1">•</span>
+                <span className="text-foreground">{weakness}</span>
+              </li>
+            ))}
+          </ul>
+        </CritiqueSection>
+
+        {/* What Would Break This */}
+        <CritiqueSection
+          icon={Crosshair}
+          title="What Would Break This"
+          iconColor="text-orange-500"
+        >
+          <ul className="space-y-2">
+            {critique.whatWouldBreakThis?.map((scenario, index) => (
+              <li key={index} className="flex items-start gap-2">
+                <span className="text-muted-foreground mt-1">•</span>
+                <span className="text-foreground">{scenario}</span>
+              </li>
+            ))}
+          </ul>
+        </CritiqueSection>
+
+        {/* Closing Statement */}
+        <div className="bg-card rounded-lg border border-border p-6 text-center">
+          <p className="text-lg font-display font-semibold text-accent">
+            Prove me wrong.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
