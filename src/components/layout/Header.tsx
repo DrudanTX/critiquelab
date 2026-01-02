@@ -8,7 +8,6 @@ import { User } from "@supabase/supabase-js";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/pricing", label: "Pricing" },
   { href: "/trust", label: "Trust & Integrity" },
 ];
 
