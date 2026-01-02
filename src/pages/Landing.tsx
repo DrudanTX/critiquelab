@@ -38,13 +38,6 @@ export default function Landing() {
                 Start Challenging
                 <ArrowRight className="ml-2" size={20} />
               </Button>
-              <Button 
-                variant="hero-outline" 
-                size="xl" 
-                onClick={() => navigate("/pricing")}
-              >
-                View Pricing
-              </Button>
             </div>
           </div>
         </div>
