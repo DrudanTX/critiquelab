@@ -150,7 +150,6 @@ export default function Dashboard() {
       toast({
         title: "Authentication required",
         description: "Please log in to access the dashboard.",
-        variant: "destructive",
       });
       navigate("/auth");
     }
