@@ -9,7 +9,8 @@ import {
   CheckCircle, 
   AlertTriangle,
   Plus,
-  Loader2
+  Loader2,
+  Trash2
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
 import { useToast } from "@/hooks/use-toast";
@@ -334,6 +335,34 @@ export default function Dashboard() {
     setIsViewingHistory(true);
   };
 
+  const handleDeleteCritique = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    try {
+      const { error } = await supabase
+        .from("saved_critiques")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+
+      setSavedCritiques((prev) => prev.filter((c) => c.id !== id));
+      toast({
+        title: "Critique deleted",
+        description: "The critique has been removed from your history.",
+      });
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the critique.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Layout showFooter={false}>
       <div className="min-h-[calc(100vh-4rem)] bg-background">
@@ -454,19 +483,30 @@ export default function Dashboard() {
                 {savedCritiques.length > 0 ? (
                   <div className="space-y-3">
                     {savedCritiques.map((saved) => (
-                      <button 
+                      <div 
                         key={saved.id}
-                        onClick={() => handleViewSavedCritique(saved)}
-                        className="w-full text-left p-3 bg-secondary/50 rounded-lg border border-border/50 hover:bg-secondary hover:border-accent/30 transition-colors cursor-pointer"
+                        className="relative group"
                       >
-                        <p className="text-sm text-foreground line-clamp-2 mb-2">
-                          {saved.input_text.slice(0, 100)}{saved.input_text.length > 100 ? '...' : ''}
-                        </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>Score: {saved.argument_strength_score}/100</span>
-                          <span>{new Date(saved.created_at).toLocaleDateString()}</span>
-                        </div>
-                      </button>
+                        <button 
+                          onClick={() => handleViewSavedCritique(saved)}
+                          className="w-full text-left p-3 bg-secondary/50 rounded-lg border border-border/50 hover:bg-secondary hover:border-accent/30 transition-colors cursor-pointer pr-10"
+                        >
+                          <p className="text-sm text-foreground line-clamp-2 mb-2">
+                            {saved.input_text.slice(0, 100)}{saved.input_text.length > 100 ? '...' : ''}
+                          </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Score: {saved.argument_strength_score}/100</span>
+                            <span>{new Date(saved.created_at).toLocaleDateString()}</span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteCritique(saved.id, e)}
+                          className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
+                          title="Delete critique"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 ) : (
