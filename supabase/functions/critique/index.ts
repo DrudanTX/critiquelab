@@ -194,41 +194,6 @@ serve(async (req) => {
   }
 
   try {
-    // Validate user authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      console.error("No authorization header provided");
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.error("Auth validation failed:", authError?.message);
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired session" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log("Authenticated user:", user.id);
-
-    // Get usage count for tracking (no limits)
-    const { count } = await supabase
-      .from("critique_usage")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
-
-    const usageCount = count ?? 0;
-    console.log("User usage count:", usageCount);
 
     const { text, persona = "free" } = await req.json();
 
@@ -320,24 +285,12 @@ serve(async (req) => {
       );
     }
 
-    // Record the usage
-    const { error: insertError } = await supabase
-      .from("critique_usage")
-      .insert({ user_id: user.id });
-
-    if (insertError) {
-      console.error("Failed to record usage:", insertError);
-      // Don't fail the request, just log the error
-    }
-
-    const newUsageCount = usageCount + 1;
-    console.log("Parsed critique, new usage count:", newUsageCount, "persona used:", persona);
+    console.log("Critique completed, persona used:", persona);
 
     return new Response(
       JSON.stringify({ 
         critique, 
-        persona,
-        usageCount: newUsageCount
+        persona
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
