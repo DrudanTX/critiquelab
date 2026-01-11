@@ -1,21 +1,16 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { 
   Upload, 
   FileText, 
-  Clock, 
   CheckCircle, 
-  AlertTriangle,
   Plus,
-  Loader2,
-  Trash2
+  Loader2
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
 import { PersonaSelector, Persona, getDefaultPersona } from "@/components/PersonaSelector";
 
 interface CritiqueData {
@@ -31,129 +26,16 @@ interface CritiqueData {
   whatWouldBreakThis?: string[];
 }
 
-interface SavedCritiqueRaw {
-  id: string;
-  input_text: string;
-  primary_objection: string;
-  logical_flaws: unknown;
-  weak_assumptions: unknown;
-  counterarguments: unknown;
-  real_world_failures: unknown;
-  argument_strength_score: number;
-  created_at: string;
-}
-
-interface SavedCritique {
-  id: string;
-  input_text: string;
-  primary_objection: string;
-  logical_flaws: string[];
-  weak_assumptions: string[];
-  counterarguments: string[];
-  real_world_failures: string[];
-  argument_strength_score: number;
-  created_at: string;
-}
-
-const parseSavedCritique = (raw: SavedCritiqueRaw): SavedCritique => ({
-  ...raw,
-  logical_flaws: Array.isArray(raw.logical_flaws) ? raw.logical_flaws as string[] : [],
-  weak_assumptions: Array.isArray(raw.weak_assumptions) ? raw.weak_assumptions as string[] : [],
-  counterarguments: Array.isArray(raw.counterarguments) ? raw.counterarguments as string[] : [],
-  real_world_failures: Array.isArray(raw.real_world_failures) ? raw.real_world_failures as string[] : [],
-});
-
-// Site is now free - no limits
+// Site is now free - no limits, no auth
 
 export default function Dashboard() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [critique, setCritique] = useState<CritiqueData | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [usageCount, setUsageCount] = useState(0);
-  const [isLoadingUsage, setIsLoadingUsage] = useState(true);
-  const [savedCritiques, setSavedCritiques] = useState<SavedCritique[]>([]);
   const [currentInputText, setCurrentInputText] = useState("");
-  const [isViewingHistory, setIsViewingHistory] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<Persona>(() => getDefaultPersona());
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setIsAuthLoading(false);
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsAuthLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Fetch usage count and saved critiques when session is available
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!session?.user?.id) {
-        setIsLoadingUsage(false);
-        return;
-      }
-      
-      try {
-        // Fetch usage count
-        const { count, error: countError } = await supabase
-          .from("critique_usage")
-          .select("*", { count: "exact", head: true })
-          .eq("user_id", session.user.id);
-
-        if (countError) {
-          console.error("Failed to fetch usage count:", countError);
-        } else {
-          setUsageCount(count ?? 0);
-        }
-
-        // Fetch saved critiques
-        const { data: critiques, error: critiquesError } = await supabase
-          .from("saved_critiques")
-          .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
-          .eq("user_id", session.user.id)
-          .order("created_at", { ascending: false })
-          .limit(5);
-
-        if (critiquesError) {
-          console.error("Failed to fetch saved critiques:", critiquesError);
-        } else if (critiques) {
-          setSavedCritiques(critiques.map(c => parseSavedCritique(c as SavedCritiqueRaw)));
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoadingUsage(false);
-      }
-    };
-
-    if (session) {
-      fetchData();
-    }
-  }, [session]);
-
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!isAuthLoading && !session) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to access the dashboard.",
-      });
-      navigate("/auth");
-    }
-  }, [isAuthLoading, session, navigate, toast]);
 
   const handleCritique = async () => {
     if (!inputText.trim()) {
@@ -164,46 +46,6 @@ export default function Dashboard() {
       });
       return;
     }
-
-    const { data: { session: existingSession } } = await supabase.auth.getSession();
-
-    if (!existingSession) {
-      toast({
-        title: "Session expired",
-        description: "Please log in again.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const { data: { session: freshSession }, error: refreshError } = await supabase.auth.refreshSession();
-
-    if (refreshError || !freshSession) {
-      await supabase.auth.signOut();
-      toast({
-        title: "Session expired",
-        description: "Please log in again.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      await supabase.auth.signOut();
-      toast({
-        title: "Session expired",
-        description: "Please log in again.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    const userId = user.id;
 
     setIsLoading(true);
     setCritique(null);
@@ -216,17 +58,6 @@ export default function Dashboard() {
 
       if (error) {
         const status = (error as any)?.context?.status ?? (error as any)?.status;
-
-        if (status === 401) {
-          toast({
-            title: "Session expired",
-            description: "Please log in again.",
-            variant: "destructive",
-          });
-          navigate("/auth");
-          return;
-        }
-
 
         if (status === 429) {
           toast({
@@ -272,35 +103,11 @@ export default function Dashboard() {
       }
       
       setCritique(normalizedCritique);
-      setUsageCount(result.usageCount);
-
-      // Save the critique to the database (only for non-demo personas that have full data)
-      if (userId && persona !== "demo") {
-        const { data: savedData, error: saveError } = await supabase
-          .from("saved_critiques")
-          .insert({
-            user_id: userId,
-            input_text: inputText,
-            primary_objection: normalizedCritique.primaryObjection,
-            logical_flaws: normalizedCritique.logicalFlaws,
-            weak_assumptions: normalizedCritique.weakAssumptions,
-            counterarguments: normalizedCritique.counterarguments,
-            real_world_failures: normalizedCritique.realWorldFailures,
-            argument_strength_score: normalizedCritique.argumentStrengthScore,
-          })
-          .select("id, input_text, primary_objection, logical_flaws, weak_assumptions, counterarguments, real_world_failures, argument_strength_score, created_at")
-          .single();
-
-        if (saveError) {
-          console.error("Failed to save critique:", saveError);
-        } else if (savedData) {
-          setSavedCritiques((prev) => [parseSavedCritique(savedData as SavedCritiqueRaw), ...prev.slice(0, 4)]);
-        }
-      }
+      setUsageCount(prev => prev + 1);
 
       toast({
         title: "Critique complete",
-        description: `${result.remaining} critique${result.remaining === 1 ? "" : "s"} remaining.`,
+        description: "Your text has been analyzed.",
       });
     } catch (error) {
       console.error("Critique error:", error);
@@ -318,48 +125,6 @@ export default function Dashboard() {
     setInputText("");
     setCritique(null);
     setCurrentInputText("");
-    setIsViewingHistory(false);
-  };
-
-  const handleViewSavedCritique = (saved: SavedCritique) => {
-    setCritique({
-      primaryObjection: saved.primary_objection,
-      logicalFlaws: saved.logical_flaws,
-      weakAssumptions: saved.weak_assumptions,
-      counterarguments: saved.counterarguments,
-      realWorldFailures: saved.real_world_failures,
-      argumentStrengthScore: saved.argument_strength_score,
-    });
-    setCurrentInputText(saved.input_text);
-    setIsViewingHistory(true);
-  };
-
-  const handleDeleteCritique = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    try {
-      const { error } = await supabase
-        .from("saved_critiques")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        throw error;
-      }
-
-      setSavedCritiques((prev) => prev.filter((c) => c.id !== id));
-      toast({
-        title: "Critique deleted",
-        description: "The critique has been removed from your history.",
-      });
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete the critique.",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
@@ -388,8 +153,8 @@ export default function Dashboard() {
           <div className="grid grid-cols-2 gap-4 mb-8">
             <StatCard 
               icon={FileText} 
-              label="Total Critiques" 
-              value={isLoadingUsage ? "..." : String(usageCount)} 
+              label="Session Critiques" 
+              value={String(usageCount)} 
             />
             <StatCard 
               icon={CheckCircle} 
@@ -474,65 +239,16 @@ export default function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Recent Activity */}
-              <div className="bg-card rounded-lg border border-border p-6">
-                <h3 className="font-display text-lg font-semibold text-foreground mb-4">
-                  Recent Critiques
-                </h3>
-                {savedCritiques.length > 0 ? (
-                  <div className="space-y-3">
-                    {savedCritiques.map((saved) => (
-                      <div 
-                        key={saved.id}
-                        className="relative group"
-                      >
-                        <button 
-                          onClick={() => handleViewSavedCritique(saved)}
-                          className="w-full text-left p-3 bg-secondary/50 rounded-lg border border-border/50 hover:bg-secondary hover:border-accent/30 transition-colors cursor-pointer pr-10"
-                        >
-                          <p className="text-sm text-foreground line-clamp-2 mb-2">
-                            {saved.input_text.slice(0, 100)}{saved.input_text.length > 100 ? '...' : ''}
-                          </p>
-                          <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>Score: {saved.argument_strength_score}/100</span>
-                            <span>{new Date(saved.created_at).toLocaleDateString()}</span>
-                          </div>
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteCritique(saved.id, e)}
-                          className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
-                          title="Delete critique"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center mx-auto mb-3">
-                      <FileText className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      No critiques yet
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Submit your first document to get started
-                    </p>
-                  </div>
-                )}
-              </div>
-
               {/* Quick Tips */}
               <div className="bg-card rounded-lg border border-border p-6">
                 <h3 className="font-display text-lg font-semibold text-foreground mb-4">
-                  Tips for Better Critiques
+                  Quick Tips
                 </h3>
-                <ul className="space-y-3">
-                  <TipItem text="Include your thesis statement clearly" />
-                  <TipItem text="Provide context for your argument" />
-                  <TipItem text="Include your citations if applicable" />
-                  <TipItem text="Specify your target audience" />
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  <TipItem text="Be specific about your main argument" />
+                  <TipItem text="Include supporting evidence if available" />
+                  <TipItem text="State your assumptions clearly" />
+                  <TipItem text="Consider potential counterarguments" />
                 </ul>
               </div>
             </div>
@@ -543,16 +259,16 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function StatCard({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className="bg-card rounded-lg border border-border p-4 md:p-5">
+    <div className="bg-card rounded-lg border border-border p-4">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
           <Icon className="w-5 h-5 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-2xl font-display font-bold text-foreground">{value}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-lg font-semibold text-foreground">{value}</p>
         </div>
       </div>
     </div>
@@ -561,9 +277,9 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label
 
 function TipItem({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-2 text-sm">
-      <CheckCircle className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-      <span className="text-muted-foreground">{text}</span>
+    <li className="flex items-start gap-2">
+      <CheckCircle className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+      <span>{text}</span>
     </li>
   );
 }
