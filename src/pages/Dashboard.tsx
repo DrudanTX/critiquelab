@@ -13,6 +13,56 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonaSelector, Persona, getDefaultPersona } from "@/components/PersonaSelector";
 
+// ============================================================================
+// Input Validation Constants
+// SECURITY: Client-side validation for UX (server validates authoritatively)
+// ============================================================================
+const INPUT_CONSTRAINTS = {
+  minTextLength: 10,         // Minimum characters for meaningful critique
+  maxTextLength: 50000,      // Maximum characters (matches server limit)
+} as const;
+
+/**
+ * Sanitizes user input text
+ * SECURITY: Basic sanitization for display/UX purposes
+ * Note: Server performs authoritative validation
+ */
+function sanitizeInput(text: string): string {
+  return text
+    .replace(/\0/g, "")              // Remove null bytes
+    .replace(/\r\n/g, "\n")          // Normalize line endings
+    .replace(/\r/g, "\n")
+    .trim();
+}
+
+/**
+ * Validates text input on client side
+ * Returns validation result with specific error messages
+ */
+function validateTextInput(text: string): { valid: boolean; error?: string } {
+  const sanitized = sanitizeInput(text);
+  
+  if (sanitized.length === 0) {
+    return { valid: false, error: "Please enter some text to critique." };
+  }
+  
+  if (sanitized.length < INPUT_CONSTRAINTS.minTextLength) {
+    return { 
+      valid: false, 
+      error: `Please enter at least ${INPUT_CONSTRAINTS.minTextLength} characters for a meaningful critique.` 
+    };
+  }
+  
+  if (sanitized.length > INPUT_CONSTRAINTS.maxTextLength) {
+    return { 
+      valid: false, 
+      error: `Text exceeds maximum length of ${INPUT_CONSTRAINTS.maxTextLength.toLocaleString()} characters.` 
+    };
+  }
+  
+  return { valid: true };
+}
+
 interface CritiqueData {
   primaryObjection: string;
   logicalFlaws: string[];
@@ -38,10 +88,14 @@ export default function Dashboard() {
   const { toast } = useToast();
 
   const handleCritique = async () => {
-    if (!inputText.trim()) {
+    // SECURITY: Client-side validation for UX (server validates authoritatively)
+    const sanitizedText = sanitizeInput(inputText);
+    const validation = validateTextInput(sanitizedText);
+    
+    if (!validation.valid) {
       toast({
-        title: "No text provided",
-        description: "Please enter or paste your text to critique.",
+        title: "Invalid input",
+        description: validation.error,
         variant: "destructive",
       });
       return;
@@ -49,11 +103,16 @@ export default function Dashboard() {
 
     setIsLoading(true);
     setCritique(null);
-    setCurrentInputText(inputText);
+    setCurrentInputText(sanitizedText);
 
     try {
+      // SECURITY: Only send validated, sanitized data
+      // Server performs authoritative validation
       const { data, error } = await supabase.functions.invoke("critique", {
-        body: { text: inputText, persona: selectedPersona },
+        body: { 
+          text: sanitizedText, 
+          persona: selectedPersona 
+        },
       });
 
       if (error) {
@@ -198,13 +257,28 @@ export default function Dashboard() {
                       <span className="text-sm text-muted-foreground">or paste your text</span>
                       <div className="h-px flex-1 bg-border" />
                     </div>
-                    <textarea 
-                      className="w-full h-40 p-4 bg-background border border-border rounded-lg resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all"
-                      placeholder="Paste your essay, argument, or research paper here..."
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <textarea 
+                        className="w-full h-40 p-4 bg-background border border-border rounded-lg resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/50 transition-all"
+                        placeholder="Paste your essay, argument, or research paper here..."
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        disabled={isLoading}
+                        maxLength={INPUT_CONSTRAINTS.maxTextLength}
+                      />
+                      {/* Character count indicator */}
+                      <div className="absolute bottom-2 right-3 text-xs text-muted-foreground">
+                        <span className={inputText.length > INPUT_CONSTRAINTS.maxTextLength * 0.9 ? "text-destructive" : ""}>
+                          {inputText.length.toLocaleString()}
+                        </span>
+                        /{INPUT_CONSTRAINTS.maxTextLength.toLocaleString()}
+                      </div>
+                    </div>
+                    {inputText.length > 0 && inputText.length < INPUT_CONSTRAINTS.minTextLength && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Minimum {INPUT_CONSTRAINTS.minTextLength} characters required
+                      </p>
+                    )}
                   </div>
 
                   {/* Persona Selector */}
