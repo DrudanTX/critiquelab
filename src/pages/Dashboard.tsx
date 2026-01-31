@@ -9,7 +9,9 @@ import {
   Loader2
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
+import { CritiqueHistory, SavedCritique } from "@/components/CritiqueHistory";
 import { useToast } from "@/hooks/use-toast";
+import { useCritiqueHistory } from "@/hooks/useCritiqueHistory";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonaSelector, Persona, getDefaultPersona } from "@/components/PersonaSelector";
 import { motion, AnimatePresence } from "framer-motion";
@@ -87,7 +89,9 @@ export default function Dashboard() {
   const [usageCount, setUsageCount] = useState(0);
   const [currentInputText, setCurrentInputText] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<Persona>(() => getDefaultPersona());
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | undefined>();
   const { toast } = useToast();
+  const { critiques: savedCritiques, addCritique, deleteCritique } = useCritiqueHistory();
 
   const handleCritique = async () => {
     // SECURITY: Client-side validation for UX (server validates authoritatively)
@@ -165,6 +169,10 @@ export default function Dashboard() {
       
       setCritique(normalizedCritique);
       setUsageCount(prev => prev + 1);
+      
+      // Save to history
+      addCritique(sanitizedText, normalizedCritique, selectedPersona);
+      setSelectedHistoryId(undefined);
 
       toast({
         title: "Critique complete",
@@ -186,6 +194,25 @@ export default function Dashboard() {
     setInputText("");
     setCritique(null);
     setCurrentInputText("");
+    setSelectedHistoryId(undefined);
+  };
+
+  const handleSelectHistory = (saved: SavedCritique) => {
+    setCritique(saved.critique);
+    setCurrentInputText(saved.inputText);
+    setSelectedHistoryId(saved.id);
+  };
+
+  const handleDeleteHistory = (id: string) => {
+    deleteCritique(id);
+    // If we're viewing the deleted critique, clear it
+    if (selectedHistoryId === id) {
+      handleNewCritique();
+    }
+    toast({
+      title: "Critique deleted",
+      description: "The critique has been removed from your history.",
+    });
   };
 
   return (
@@ -385,6 +412,14 @@ export default function Dashboard() {
                     <TipItem text="Consider potential counterarguments" delay={0.3} />
                   </ul>
                 </div>
+
+                {/* Past Critiques */}
+                <CritiqueHistory
+                  critiques={savedCritiques}
+                  onSelect={handleSelectHistory}
+                  onDelete={handleDeleteHistory}
+                  selectedId={selectedHistoryId}
+                />
               </div>
             </FadeIn>
           </div>
