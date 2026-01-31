@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { History, Trash2, ChevronRight, Gauge } from "lucide-react";
+import { History, Trash2, Gauge } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -61,8 +61,6 @@ export function CritiqueHistory({
     return date.toLocaleDateString(undefined, { 
       month: 'short', 
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   };
 
@@ -108,22 +106,25 @@ export function CritiqueHistory({
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10, height: 0 }}
               transition={{ delay: index * 0.05, duration: 0.2 }}
-              className={`group relative mb-2 last:mb-0`}
+              className="group relative mb-2 last:mb-0"
             >
-              <button
-                onClick={() => onSelect(item)}
-                className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
+              <div
+                className={`w-full p-3 rounded-lg border transition-all duration-200 ${
                   selectedId === item.id
                     ? "border-accent/50 bg-accent/5"
                     : "border-border hover:border-accent/30 hover:bg-secondary/50"
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {truncateText(item.inputText)}
+                <div className="flex items-start gap-2">
+                  {/* Content - clickable */}
+                  <button
+                    onClick={() => onSelect(item)}
+                    className="flex-1 min-w-0 text-left"
+                  >
+                    <p className="text-sm font-medium text-foreground line-clamp-2 break-words">
+                      {item.inputText.slice(0, 80)}{item.inputText.length > 80 ? "..." : ""}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                       <span className="text-xs text-muted-foreground">
                         {formatDate(item.createdAt)}
                       </span>
@@ -135,49 +136,46 @@ export function CritiqueHistory({
                         </span>
                       </div>
                     </div>
-                  </div>
-                  <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${
-                    selectedId === item.id ? "text-accent" : ""
-                  }`} />
+                  </button>
+                  
+                  {/* Delete button - always visible */}
+                  <AlertDialog open={deleteId === item.id} onOpenChange={(open) => !open && setDeleteId(null)}>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 flex-shrink-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(item.id);
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Critique</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete this critique? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => {
+                            onDelete(item.id);
+                            setDeleteId(null);
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
-              </button>
-              
-              {/* Delete button */}
-              <AlertDialog open={deleteId === item.id} onOpenChange={(open) => !open && setDeleteId(null)}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-1/2 -translate-y-1/2 right-10 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteId(item.id);
-                    }}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Critique</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to delete this critique? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => {
-                        onDelete(item.id);
-                        setDeleteId(null);
-                      }}
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
