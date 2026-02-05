@@ -1,7 +1,16 @@
  import { motion } from "framer-motion";
- import { HealthSummary as HealthSummaryType, CATEGORY_CONFIG } from "@/types/argumentAutopsy";
+ import { HealthSummary as HealthSummaryType, CATEGORY_CONFIG, SentenceCategory } from "@/types/argumentAutopsy";
  import { Progress } from "@/components/ui/progress";
  import { AlertTriangle, CheckCircle, XCircle, Target } from "lucide-react";
+ 
+ // Map breakdown keys to CATEGORY_CONFIG keys
+ const BREAKDOWN_KEY_MAP: Record<string, SentenceCategory> = {
+   claims: "claim",
+   reasoning: "reasoning",
+   evidence: "evidence",
+   impact: "impact",
+   filler: "filler",
+ };
  
  interface HealthSummaryProps {
    summary: HealthSummaryType;
@@ -78,7 +87,9 @@
          <h4 className="text-sm font-medium text-foreground">Sentence Breakdown</h4>
          <div className="grid grid-cols-2 gap-2">
            {Object.entries(summary.breakdown).map(([key, count]) => {
-             const config = CATEGORY_CONFIG[key as keyof typeof CATEGORY_CONFIG];
+             const categoryKey = BREAKDOWN_KEY_MAP[key] || key;
+             const config = CATEGORY_CONFIG[categoryKey as SentenceCategory];
+             if (!config) return null;
              return (
                <div 
                  key={key}
