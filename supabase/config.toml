@@ -2,3 +2,6 @@ project_id = "qpuljsshgvblgvvbvnkh"
 
 [functions.critique]
 verify_jwt = false
+ 
+ [functions.argument-autopsy]
+ verify_jwt = false
