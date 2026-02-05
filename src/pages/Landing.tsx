@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Zap } from "lucide-react";
+ import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Zap, Microscope } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover, FloatingElement } from "@/components/animations";
 
@@ -93,6 +93,14 @@ export default function Landing() {
                 description="Identifies logical fallacies, weak premises, and gaps in reasoning that could undermine your thesis."
               />
             </StaggerItem>
+           <StaggerItem>
+             <FeatureCard
+               icon={Microscope}
+               title="Argument Autopsy"
+               description="Dissect your arguments sentence by sentence to see what's analysis and what's filler."
+               href="/autopsy"
+             />
+           </StaggerItem>
             <StaggerItem>
               <FeatureCard
                 icon={Shield}
@@ -119,13 +127,6 @@ export default function Landing() {
                 icon={Users}
                 title="Peer Review Simulation"
                 description="Experience the critique process before submission with AI-powered review simulation."
-              />
-            </StaggerItem>
-            <StaggerItem>
-              <FeatureCard
-                icon={Zap}
-                title="Iterative Refinement"
-                description="Work through multiple rounds of critique to progressively strengthen your arguments."
               />
             </StaggerItem>
           </StaggerContainer>
@@ -221,13 +222,16 @@ export default function Landing() {
   );
 }
 
-function FeatureCard({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) {
+ function FeatureCard({ icon: Icon, title, description, href }: { icon: React.ElementType; title: string; description: string; href?: string }) {
+   const navigate = useNavigate();
+   
   return (
     <ScaleOnHover scale={1.03}>
       <motion.div 
-        className="group p-6 md:p-8 bg-background rounded-lg border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 h-full"
+         className={`group p-6 md:p-8 bg-background rounded-lg border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 h-full ${href ? "cursor-pointer" : ""}`}
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}
+         onClick={href ? () => navigate(href) : undefined}
       >
         <motion.div 
           className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-5 group-hover:bg-accent/10 transition-colors"
