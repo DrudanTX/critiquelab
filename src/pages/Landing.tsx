@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
- import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Zap, Microscope } from "lucide-react";
+import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Microscope } from "lucide-react";
 import { motion } from "framer-motion";
-import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover, FloatingElement } from "@/components/animations";
+import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from "@/components/animations";
+import { FloatingOrb } from "@/components/ambient/PaperTexture";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -14,54 +15,56 @@ export default function Landing() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 subtle-gradient" />
         
-        {/* Animated background elements */}
-        <FloatingElement className="absolute top-1/4 left-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" duration={6} distance={20}>
-          <div />
-        </FloatingElement>
-        <FloatingElement className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" duration={8} distance={15}>
-          <div />
-        </FloatingElement>
+        {/* Gentle floating orbs */}
+        <FloatingOrb 
+          className="top-1/4 -left-20 w-80 h-80 bg-accent/5" 
+          delay={0} 
+        />
+        <FloatingOrb 
+          className="bottom-0 right-0 w-96 h-96 bg-accent-secondary/5" 
+          delay={2} 
+        />
         
         <div className="relative container px-4 md:px-6 py-24 md:py-32 lg:py-40">
           <div className="max-w-3xl mx-auto text-center">
             <FadeIn delay={0} direction="none">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border mb-8">
+              <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-secondary/60 border border-border/50 mb-10">
                 <motion.span 
                   className="w-2 h-2 rounded-full bg-accent"
-                  animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
+                  animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <span className="text-sm font-medium text-muted-foreground">
-                  Adversarial AI for Critical Thinking
+                  Quiet thinking, sharper writing
                 </span>
               </div>
             </FadeIn>
             
-            <FadeIn delay={0.1}>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6">
+            <FadeIn delay={0.15}>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-medium text-foreground leading-tight mb-8">
                 Challenge Your Ideas.{" "}
-                <span className="text-gradient">Made to Prove You Wrong.</span>
+                <span className="text-accent">Clarity builds over time.</span>
               </h1>
             </FadeIn>
             
-            <FadeIn delay={0.2}>
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl mx-auto">
-                CritiqueLab is an adversarial AI platform that rigorously challenges your essays, research papers, and arguments—helping you strengthen your work before others find the flaws.
+            <FadeIn delay={0.3}>
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-12 max-w-2xl mx-auto">
+                CritiqueLab helps you refine your arguments in a calm, focused space—finding the gaps before others do, one thought at a time.
               </p>
             </FadeIn>
             
-            <FadeIn delay={0.3}>
+            <FadeIn delay={0.45}>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-                <ScaleOnHover>
+                <ScaleOnHover scale={1.02}>
                   <Button 
                     variant="hero" 
                     size="xl" 
                     onClick={() => navigate("/dashboard")}
                   >
-                    Start Challenging
+                    Start Writing
                     <motion.span
-                      animate={{ x: [0, 4, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
+                      animate={{ x: [0, 3, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                     >
                       <ArrowRight className="ml-2" size={20} />
                     </motion.span>
@@ -74,59 +77,59 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 md:py-28 bg-card">
+      <section className="py-24 md:py-32 bg-card/50">
         <div className="container px-4 md:px-6">
-          <FadeIn className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              Rigorous Analysis, Not Flattery
+          <FadeIn className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-5">
+              Thoughtful Analysis, Not Noise
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Unlike typical AI assistants, CritiqueLab actively seeks weaknesses in your arguments to help you build stronger work.
+              Take your time. We're here to help you think deeper, not faster.
             </p>
           </FadeIn>
           
-          <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8" staggerDelay={0.1}>
+          <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" staggerDelay={0.15}>
             <StaggerItem>
               <FeatureCard
                 icon={Target}
-                title="Argument Analysis"
-                description="Identifies logical fallacies, weak premises, and gaps in reasoning that could undermine your thesis."
+                title="Find the Gaps"
+                description="Gently identifies weak spots in your reasoning—so you can strengthen them."
               />
             </StaggerItem>
-           <StaggerItem>
-             <FeatureCard
-               icon={Microscope}
-               title="Argument Autopsy"
-               description="Dissect your arguments sentence by sentence to see what's analysis and what's filler."
-               href="/autopsy"
-             />
-           </StaggerItem>
+            <StaggerItem>
+              <FeatureCard
+                icon={Microscope}
+                title="Argument Autopsy"
+                description="See what's analysis and what's filler, sentence by sentence."
+                href="/autopsy"
+              />
+            </StaggerItem>
             <StaggerItem>
               <FeatureCard
                 icon={Shield}
-                title="Counterargument Generation"
-                description="Anticipates opposing viewpoints and helps you prepare robust responses to criticism."
+                title="Anticipate Questions"
+                description="Explore counterarguments before your readers find them."
               />
             </StaggerItem>
             <StaggerItem>
               <FeatureCard
                 icon={Lightbulb}
-                title="Evidence Evaluation"
-                description="Assesses the strength and relevance of your supporting evidence and citations."
+                title="Evidence Check"
+                description="Quietly evaluates how well your examples support your claims."
               />
             </StaggerItem>
             <StaggerItem>
               <FeatureCard
                 icon={BookOpen}
-                title="Academic Standards"
-                description="Ensures your work meets scholarly rigor and adheres to academic integrity guidelines."
+                title="Academic Care"
+                description="Ensures your work meets scholarly standards with gentle guidance."
               />
             </StaggerItem>
             <StaggerItem>
               <FeatureCard
                 icon={Users}
-                title="Peer Review Simulation"
-                description="Experience the critique process before submission with AI-powered review simulation."
+                title="Practice Review"
+                description="Experience thoughtful critique before you share with the world."
               />
             </StaggerItem>
           </StaggerContainer>
@@ -134,37 +137,37 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="py-20 md:py-28">
+      <section className="py-24 md:py-32">
         <div className="container px-4 md:px-6">
-          <FadeIn className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-              How CritiqueLab Works
+          <FadeIn className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-5">
+              How It Works
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A simple process designed for rigorous intellectual engagement.
+              Simple steps. Take your time with each one.
             </p>
           </FadeIn>
           
-          <StaggerContainer className="grid md:grid-cols-3 gap-8 md:gap-12 max-w-4xl mx-auto" staggerDelay={0.15}>
+          <StaggerContainer className="grid md:grid-cols-3 gap-12 max-w-4xl mx-auto" staggerDelay={0.2}>
             <StaggerItem>
               <StepCard
                 number="01"
-                title="Submit Your Work"
-                description="Upload your essay, research paper, or argument in any format."
+                title="Share Your Thoughts"
+                description="Paste your essay, paper, or argument. No rush."
               />
             </StaggerItem>
             <StaggerItem>
               <StepCard
                 number="02"
-                title="Receive Critique"
-                description="Our adversarial AI analyzes and challenges every aspect of your work."
+                title="Receive Gentle Feedback"
+                description="Get calm, constructive insights on what could be stronger."
               />
             </StaggerItem>
             <StaggerItem>
               <StepCard
                 number="03"
-                title="Strengthen & Refine"
-                description="Address weaknesses and iterate until your argument is airtight."
+                title="Refine & Grow"
+                description="Iterate at your own pace until it feels right."
               />
             </StaggerItem>
           </StaggerContainer>
@@ -172,46 +175,42 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 hero-gradient text-primary-foreground overflow-hidden relative">
-        {/* Animated accent elements */}
-        <motion.div 
-          className="absolute -top-20 -right-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 6, repeat: Infinity }}
+      <section className="py-24 md:py-32 bg-secondary/30 overflow-hidden relative">
+        <FloatingOrb 
+          className="-top-20 -right-20 w-80 h-80 bg-accent/10" 
+          delay={1} 
         />
         
         <div className="container px-4 md:px-6 text-center relative z-10">
           <FadeIn>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
-              Ready to Challenge Your Thinking?
+            <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-6">
+              Ready to think deeper?
             </h2>
           </FadeIn>
-          <FadeIn delay={0.1}>
-            <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto mb-10">
-              Join researchers, academics, and critical thinkers who use CritiqueLab to produce their best work.
+          <FadeIn delay={0.15}>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-12">
+              Join writers and thinkers who take time to refine their ideas.
             </p>
           </FadeIn>
-          <FadeIn delay={0.2}>
+          <FadeIn delay={0.3}>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10">
-              <ScaleOnHover>
+              <ScaleOnHover scale={1.02}>
                 <Button 
-                  variant="accent" 
-                  size="xl" 
-                  className="shadow-lg"
+                  variant="hero" 
+                  size="xl"
                   onClick={() => navigate("/dashboard")}
                 >
-                  Get Started Free
+                  Get Started
                   <ArrowRight className="ml-2" size={20} />
                 </Button>
               </ScaleOnHover>
-              <ScaleOnHover>
+              <ScaleOnHover scale={1.02}>
                 <Button 
-                  variant="outline" 
+                  variant="hero-outline" 
                   size="xl"
-                  className="border-primary-foreground/30 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
                   onClick={() => navigate("/trust")}
                 >
-                  Learn About Our Standards
+                  Learn More
                 </Button>
               </ScaleOnHover>
             </div>
@@ -222,25 +221,25 @@ export default function Landing() {
   );
 }
 
- function FeatureCard({ icon: Icon, title, description, href }: { icon: React.ElementType; title: string; description: string; href?: string }) {
-   const navigate = useNavigate();
-   
+function FeatureCard({ icon: Icon, title, description, href }: { icon: React.ElementType; title: string; description: string; href?: string }) {
+  const navigate = useNavigate();
+  
   return (
-    <ScaleOnHover scale={1.03}>
+    <ScaleOnHover scale={1.02}>
       <motion.div 
-         className={`group p-6 md:p-8 bg-background rounded-lg border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 h-full ${href ? "cursor-pointer" : ""}`}
+        className={`group p-8 bg-background rounded-2xl border border-border/50 hover:border-accent/30 hover:shadow-lg transition-all duration-smooth h-full ${href ? "cursor-pointer" : ""}`}
         whileHover={{ y: -4 }}
-        transition={{ duration: 0.2 }}
-         onClick={href ? () => navigate(href) : undefined}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        onClick={href ? () => navigate(href) : undefined}
       >
         <motion.div 
-          className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-5 group-hover:bg-accent/10 transition-colors"
-          whileHover={{ rotate: [0, -5, 5, 0] }}
-          transition={{ duration: 0.4 }}
+          className="w-12 h-12 rounded-xl bg-secondary/80 flex items-center justify-center mb-6 group-hover:bg-accent/10 transition-all duration-smooth"
+          whileHover={{ rotate: [0, -3, 3, 0] }}
+          transition={{ duration: 0.6 }}
         >
-          <Icon className="w-6 h-6 text-foreground group-hover:text-accent transition-colors" />
+          <Icon className="w-5 h-5 text-muted-foreground group-hover:text-accent transition-colors duration-smooth" />
         </motion.div>
-        <h3 className="font-display text-lg font-semibold text-foreground mb-2">
+        <h3 className="font-display text-lg font-medium text-foreground mb-3">
           {title}
         </h3>
         <p className="text-muted-foreground text-sm leading-relaxed">
@@ -255,16 +254,16 @@ function StepCard({ number, title, description }: { number: string; title: strin
   return (
     <div className="text-center">
       <motion.div 
-        className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary border-2 border-accent/20 mb-6"
+        className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary/80 border border-accent/20 mb-8"
         whileHover={{ 
-          scale: 1.1,
+          scale: 1.05,
           borderColor: "hsl(var(--accent))",
         }}
-        transition={{ duration: 0.2 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
       >
-        <span className="font-display text-2xl font-bold text-accent">{number}</span>
+        <span className="font-display text-xl font-medium text-accent">{number}</span>
       </motion.div>
-      <h3 className="font-display text-xl font-semibold text-foreground mb-3">
+      <h3 className="font-display text-xl font-medium text-foreground mb-4">
         {title}
       </h3>
       <p className="text-muted-foreground leading-relaxed">
