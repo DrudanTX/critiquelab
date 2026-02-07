@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -364,4 +364,108 @@
   .breathing-room {
     @apply p-8 md:p-12 lg:p-16;
   }
+}
+
+/* ===== OG MODE ===== */
+/* Restores original CritiqueLab design: clean, modern, teal accent, Inter font */
+
+.og-mode {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+
+  --primary: 222 47% 11%;
+  --primary-foreground: 210 40% 98%;
+
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+
+  --accent: 174 60% 40%;
+  --accent-foreground: 0 0% 100%;
+
+  --accent-secondary: 220 60% 50%;
+  --accent-secondary-foreground: 0 0% 100%;
+
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+
+  --info: 220 60% 50%;
+  --info-foreground: 0 0% 100%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 174 60% 40%;
+
+  --radius: 0.5rem;
+
+  --sage: 174 60% 40%;
+  --sage-light: 174 55% 50%;
+  --sage-dark: 174 65% 30%;
+  --dusty-blue: 220 60% 50%;
+  --dusty-blue-light: 220 55% 60%;
+  --warm-gray: 215 16% 47%;
+  --paper: 0 0% 100%;
+  --paper-dark: 210 40% 96%;
+  --ink: 222 47% 11%;
+  --cream: 0 0% 100%;
+
+  --gradient-hero: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(174 60% 40%) 0%, hsl(174 55% 48%) 100%);
+  --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
+  --gradient-vignette: none;
+
+  --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+  --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1);
+  --shadow-glow: 0 0 30px hsl(174 60% 40% / 0.15);
+
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --transition-slow: 200ms ease;
+  --transition-smooth: 300ms ease;
+  --transition-gentle: 400ms ease;
+}
+
+.og-mode.dark,
+.dark .og-mode {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+
+  --card: 217 33% 17%;
+  --card-foreground: 210 40% 98%;
+
+  --popover: 217 33% 17%;
+  --popover-foreground: 210 40% 98%;
+
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 11%;
+
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+
+  --accent: 174 60% 45%;
+  --accent-foreground: 222 47% 11%;
+
+  --border: 217 33% 22%;
+  --input: 217 33% 22%;
+  --ring: 174 60% 45%;
+
+  --gradient-hero: linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(217 33% 14%) 100%);
+  --gradient-subtle: linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(217 33% 13%) 100%);
+  --gradient-vignette: none;
 }

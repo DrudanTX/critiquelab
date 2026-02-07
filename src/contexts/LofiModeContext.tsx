@@ -4,6 +4,9 @@ interface LofiModeContextType {
   focusMode: boolean;
   setFocusMode: (value: boolean) => void;
   toggleFocusMode: () => void;
+  ogMode: boolean;
+  setOgMode: (value: boolean) => void;
+  toggleOgMode: () => void;
 }
 
 const LofiModeContext = createContext<LofiModeContextType | undefined>(undefined);
@@ -16,10 +19,15 @@ export function LofiModeProvider({ children }: { children: ReactNode }) {
     return false;
   });
 
+  const [ogMode, setOgMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lofi-og-mode") === "true";
+    }
+    return false;
+  });
+
   useEffect(() => {
     localStorage.setItem("lofi-focus-mode", String(focusMode));
-    
-    // Toggle focus-mode class on body for CSS effects
     if (focusMode) {
       document.body.classList.add("focus-mode");
     } else {
@@ -27,10 +35,20 @@ export function LofiModeProvider({ children }: { children: ReactNode }) {
     }
   }, [focusMode]);
 
+  useEffect(() => {
+    localStorage.setItem("lofi-og-mode", String(ogMode));
+    if (ogMode) {
+      document.body.classList.add("og-mode");
+    } else {
+      document.body.classList.remove("og-mode");
+    }
+  }, [ogMode]);
+
   const toggleFocusMode = () => setFocusMode((prev) => !prev);
+  const toggleOgMode = () => setOgMode((prev) => !prev);
 
   return (
-    <LofiModeContext.Provider value={{ focusMode, setFocusMode, toggleFocusMode }}>
+    <LofiModeContext.Provider value={{ focusMode, setFocusMode, toggleFocusMode, ogMode, setOgMode, toggleOgMode }}>
       {children}
     </LofiModeContext.Provider>
   );
