@@ -5,3 +5,6 @@ verify_jwt = false
  
  [functions.argument-autopsy]
  verify_jwt = false
+
+ [functions.counterargument-coach]
+ verify_jwt = false
