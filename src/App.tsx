@@ -11,6 +11,7 @@ import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Trust from "./pages/Trust";
 import ArgumentAutopsy from "./pages/ArgumentAutopsy";
+import CounterargumentCoach from "./pages/CounterargumentCoach";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/trust" element={<Trust />} />
                 <Route path="/autopsy" element={<ArgumentAutopsy />} />
+                <Route path="/coach" element={<CounterargumentCoach />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
