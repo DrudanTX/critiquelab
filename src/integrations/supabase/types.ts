@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      argument_scores: {
+        Row: {
+          clarity_explanation: string
+          clarity_score: number
+          clarity_suggestion: string
+          created_at: string
+          defense_explanation: string
+          defense_score: number
+          defense_suggestion: string
+          evidence_explanation: string
+          evidence_score: number
+          evidence_suggestion: string
+          id: string
+          input_preview: string
+          logic_explanation: string
+          logic_score: number
+          logic_suggestion: string
+          source: string
+          total_score: number
+          user_id: string
+        }
+        Insert: {
+          clarity_explanation: string
+          clarity_score: number
+          clarity_suggestion: string
+          created_at?: string
+          defense_explanation: string
+          defense_score: number
+          defense_suggestion: string
+          evidence_explanation: string
+          evidence_score: number
+          evidence_suggestion: string
+          id?: string
+          input_preview: string
+          logic_explanation: string
+          logic_score: number
+          logic_suggestion: string
+          source: string
+          total_score: number
+          user_id: string
+        }
+        Update: {
+          clarity_explanation?: string
+          clarity_score?: number
+          clarity_suggestion?: string
+          created_at?: string
+          defense_explanation?: string
+          defense_score?: number
+          defense_suggestion?: string
+          evidence_explanation?: string
+          evidence_score?: number
+          evidence_suggestion?: string
+          id?: string
+          input_preview?: string
+          logic_explanation?: string
+          logic_score?: number
+          logic_suggestion?: string
+          source?: string
+          total_score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       critique_usage: {
         Row: {
           created_at: string
@@ -28,6 +91,30 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -73,7 +160,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_stats: {
+        Row: {
+          avg_score: number | null
+          display_name: string | null
+          highest_score: number | null
+          last_active: string | null
+          total_arguments: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
