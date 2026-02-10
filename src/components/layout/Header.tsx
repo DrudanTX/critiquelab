@@ -10,6 +10,7 @@ const navLinks = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/autopsy", label: "Argument Autopsy" },
   { href: "/coach", label: "Counter Coach" },
+  { href: "/progress", label: "Progress" },
   { href: "/trust", label: "Trust & Integrity" },
 ];
 
