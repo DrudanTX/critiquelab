@@ -8,3 +8,6 @@ verify_jwt = false
 
  [functions.counterargument-coach]
  verify_jwt = false
+
+ [functions.score-argument]
+ verify_jwt = false

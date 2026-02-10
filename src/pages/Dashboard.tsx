@@ -6,16 +6,20 @@ import {
   FileText, 
   CheckCircle, 
   Plus,
-  Loader2
+  Loader2,
+  BarChart3
 } from "lucide-react";
 import { CritiqueResult } from "@/components/CritiqueResult";
 import { CritiqueHistory, SavedCritique } from "@/components/CritiqueHistory";
 import { useToast } from "@/hooks/use-toast";
 import { useCritiqueHistory } from "@/hooks/useCritiqueHistory";
+import { useArgumentScores } from "@/hooks/useArgumentScores";
 import { supabase } from "@/integrations/supabase/client";
 import { PersonaSelector, Persona, getDefaultPersona } from "@/components/PersonaSelector";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn, ScaleOnHover } from "@/components/animations";
+import { ScoreBreakdown } from "@/components/scoring/ScoreBreakdown";
+import { ArgumentScore } from "@/types/argumentScore";
 
 // ============================================================================
 // Input Validation Constants
@@ -90,8 +94,11 @@ export default function Dashboard() {
   const [currentInputText, setCurrentInputText] = useState("");
   const [selectedPersona, setSelectedPersona] = useState<Persona>(() => getDefaultPersona());
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | undefined>();
+  const [currentScore, setCurrentScore] = useState<ArgumentScore | null>(null);
+  const [isScoring, setIsScoring] = useState(false);
   const { toast } = useToast();
   const { critiques: savedCritiques, addCritique, deleteCritique } = useCritiqueHistory();
+  const { addScore } = useArgumentScores();
 
   const handleCritique = async () => {
     // SECURITY: Client-side validation for UX (server validates authoritatively)
@@ -195,6 +202,43 @@ export default function Dashboard() {
     setCritique(null);
     setCurrentInputText("");
     setSelectedHistoryId(undefined);
+    setCurrentScore(null);
+  };
+
+  const handleScoreArgument = async () => {
+    if (!currentInputText) return;
+    setIsScoring(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("score-argument", {
+        body: { text: currentInputText, source: "critique" },
+      });
+      if (error) throw error;
+      const scoreData = data.score;
+      const saved = addScore({
+        source: "critique",
+        inputPreview: currentInputText.slice(0, 100),
+        totalScore: scoreData.total_score,
+        clarityScore: scoreData.clarity_score,
+        logicScore: scoreData.logic_score,
+        evidenceScore: scoreData.evidence_score,
+        defenseScore: scoreData.defense_score,
+        clarityExplanation: scoreData.clarity_explanation,
+        logicExplanation: scoreData.logic_explanation,
+        evidenceExplanation: scoreData.evidence_explanation,
+        defenseExplanation: scoreData.defense_explanation,
+        claritySuggestion: scoreData.clarity_suggestion,
+        logicSuggestion: scoreData.logic_suggestion,
+        evidenceSuggestion: scoreData.evidence_suggestion,
+        defenseSuggestion: scoreData.defense_suggestion,
+      });
+      setCurrentScore(saved);
+      toast({ title: "Scored!", description: `Your argument scored ${scoreData.total_score}/100.` });
+    } catch (e) {
+      console.error("Scoring error:", e);
+      toast({ title: "Scoring failed", description: "Could not score your argument.", variant: "destructive" });
+    } finally {
+      setIsScoring(false);
+    }
   };
 
   const handleSelectHistory = (saved: SavedCritique) => {
@@ -277,8 +321,37 @@ export default function Dashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
+                    className="space-y-6"
                   >
                     <CritiqueResult critique={critique} />
+                    
+                    {/* Score Section */}
+                    {currentScore ? (
+                      <ScoreBreakdown score={currentScore} />
+                    ) : (
+                      <div className="flex justify-center">
+                        <ScaleOnHover>
+                          <Button
+                            variant="accent"
+                            size="lg"
+                            onClick={handleScoreArgument}
+                            disabled={isScoring}
+                          >
+                            {isScoring ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Scoring...
+                              </>
+                            ) : (
+                              <>
+                                <BarChart3 className="mr-2 h-4 w-4" />
+                                Score My Argument
+                              </>
+                            )}
+                          </Button>
+                        </ScaleOnHover>
+                      </div>
+                    )}
                   </motion.div>
                 ) : (
                   <motion.div
