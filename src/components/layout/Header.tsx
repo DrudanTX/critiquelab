@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
-import { LofiToggle } from "@/components/LofiToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -52,9 +52,9 @@ export function Header() {
           ))}
         </nav>
 
-        {/* CTA Button & Lofi Toggle */}
+        {/* CTA Button & Theme Toggle */}
         <div className="hidden md:flex items-center gap-3">
-          <LofiToggle />
+          <ThemeToggle />
           <Button variant="accent" size="sm" className="rounded-xl" asChild>
             <Link to="/dashboard">Get Started</Link>
           </Button>
@@ -62,7 +62,7 @@ export function Header() {
 
         {/* Mobile Menu Button & Toggle */}
         <div className="md:hidden flex items-center gap-1">
-          <LofiToggle />
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"

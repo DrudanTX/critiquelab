@@ -5,72 +5,38 @@ import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Microscope } fr
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from "@/components/animations";
 import { FloatingOrb } from "@/components/ambient/PaperTexture";
-import { useLofiMode } from "@/contexts/LofiModeContext";
 
-// Content variants
-const content = {
-  og: {
-    badge: "AI-Powered Argument Analysis",
-    heroTitle: "Made to Prove You Wrong.",
-    heroAccent: "Sharpen every argument.",
-    heroDescription: "CritiqueLab is an adversarial AI that tears apart your essays, arguments, and ideas—so you can rebuild them stronger.",
-    heroCta: "Challenge Your Ideas",
-    featuresTitle: "Ruthless Analysis Tools",
-    featuresSubtitle: "Every tool is designed to find the weaknesses in your thinking before your audience does.",
-    features: [
-      { icon: Target, title: "Expose Weak Points", description: "Pinpoints logical fallacies, unsupported claims, and gaps in your reasoning." },
-      { icon: Microscope, title: "Argument Autopsy", description: "Dissects your text sentence by sentence—analysis vs. filler, no hiding.", href: "/autopsy" },
-      { icon: Shield, title: "Counterargument Engine", description: "Generates the strongest objections your opponents would use against you." },
-      { icon: Lightbulb, title: "Evidence Audit", description: "Tests whether your examples actually prove what you think they prove." },
-      { icon: BookOpen, title: "Academic Rigor", description: "Holds your work to scholarly standards—citations, logic, structure." },
-      { icon: Users, title: "Adversarial Review", description: "Simulates tough critics so you're never caught off guard." },
-    ],
-    howItWorksTitle: "How It Works",
-    howItWorksSubtitle: "Three steps to a stronger argument.",
-    steps: [
-      { number: "01", title: "Submit Your Argument", description: "Paste your essay, debate case, or thesis. We'll take it from there." },
-      { number: "02", title: "Get Torn Apart", description: "Receive blunt, actionable feedback on every weakness we find." },
-      { number: "03", title: "Rebuild Stronger", description: "Use our suggestions to make your argument bulletproof." },
-    ],
-    ctaTitle: "Think your argument holds up?",
-    ctaSubtitle: "Let CritiqueLab prove you wrong—or prove you right.",
-    ctaPrimary: "Get Started",
-    ctaSecondary: "How It Works",
-  },
-  lofi: {
-    badge: "Quiet thinking, sharper writing",
-    heroTitle: "Challenge Your Ideas.",
-    heroAccent: "Clarity builds over time.",
-    heroDescription: "CritiqueLab helps you refine your arguments in a calm, focused space—finding the gaps before others do, one thought at a time.",
-    heroCta: "Start Writing",
-    featuresTitle: "Thoughtful Analysis, Not Noise",
-    featuresSubtitle: "Take your time. We're here to help you think deeper, not faster.",
-    features: [
-      { icon: Target, title: "Find the Gaps", description: "Gently identifies weak spots in your reasoning—so you can strengthen them." },
-      { icon: Microscope, title: "Argument Autopsy", description: "See what's analysis and what's filler, sentence by sentence.", href: "/autopsy" },
-      { icon: Shield, title: "Anticipate Questions", description: "Explore counterarguments before your readers find them." },
-      { icon: Lightbulb, title: "Evidence Check", description: "Quietly evaluates how well your examples support your claims." },
-      { icon: BookOpen, title: "Academic Care", description: "Ensures your work meets scholarly standards with gentle guidance." },
-      { icon: Users, title: "Practice Review", description: "Experience thoughtful critique before you share with the world." },
-    ],
-    howItWorksTitle: "How It Works",
-    howItWorksSubtitle: "Simple steps. Take your time with each one.",
-    steps: [
-      { number: "01", title: "Share Your Thoughts", description: "Paste your essay, paper, or argument. No rush." },
-      { number: "02", title: "Receive Gentle Feedback", description: "Get calm, constructive insights on what could be stronger." },
-      { number: "03", title: "Refine & Grow", description: "Iterate at your own pace until it feels right." },
-    ],
-    ctaTitle: "Ready to think deeper?",
-    ctaSubtitle: "Join writers and thinkers who take time to refine their ideas.",
-    ctaPrimary: "Get Started",
-    ctaSecondary: "Learn More",
-  },
+const c = {
+  badge: "Quiet thinking, sharper writing",
+  heroTitle: "Challenge Your Ideas.",
+  heroAccent: "Clarity builds over time.",
+  heroDescription: "CritiqueLab helps you refine your arguments in a calm, focused space—finding the gaps before others do, one thought at a time.",
+  heroCta: "Start Writing",
+  featuresTitle: "Thoughtful Analysis, Not Noise",
+  featuresSubtitle: "Take your time. We're here to help you think deeper, not faster.",
+  features: [
+    { icon: Target, title: "Find the Gaps", description: "Gently identifies weak spots in your reasoning—so you can strengthen them." },
+    { icon: Microscope, title: "Argument Autopsy", description: "See what's analysis and what's filler, sentence by sentence.", href: "/autopsy" },
+    { icon: Shield, title: "Anticipate Questions", description: "Explore counterarguments before your readers find them." },
+    { icon: Lightbulb, title: "Evidence Check", description: "Quietly evaluates how well your examples support your claims." },
+    { icon: BookOpen, title: "Academic Care", description: "Ensures your work meets scholarly standards with gentle guidance." },
+    { icon: Users, title: "Practice Review", description: "Experience thoughtful critique before you share with the world." },
+  ],
+  howItWorksTitle: "How It Works",
+  howItWorksSubtitle: "Simple steps. Take your time with each one.",
+  steps: [
+    { number: "01", title: "Share Your Thoughts", description: "Paste your essay, paper, or argument. No rush." },
+    { number: "02", title: "Receive Gentle Feedback", description: "Get calm, constructive insights on what could be stronger." },
+    { number: "03", title: "Refine & Grow", description: "Iterate at your own pace until it feels right." },
+  ],
+  ctaTitle: "Ready to think deeper?",
+  ctaSubtitle: "Join writers and thinkers who take time to refine their ideas.",
+  ctaPrimary: "Get Started",
+  ctaSecondary: "Learn More",
 };
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { ogMode } = useLofiMode();
-  const c = ogMode ? content.og : content.lofi;
 
   return (
     <Layout>

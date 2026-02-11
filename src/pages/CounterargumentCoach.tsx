@@ -11,7 +11,7 @@ import { Link } from "react-router-dom";
 import { CounterargumentCard } from "@/components/coach/CounterargumentCard";
 import { RebuttalCoachCard } from "@/components/coach/RebuttalCoachCard";
 import { CoachResult } from "@/types/counterargumentCoach";
-import { useLofiMode } from "@/contexts/LofiModeContext";
+
 
 const MIN_TEXT_LENGTH = 20;
 const MAX_TEXT_LENGTH = 10000;
@@ -21,7 +21,7 @@ export default function CounterargumentCoach() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<CoachResult | null>(null);
   const { toast } = useToast();
-  const { ogMode } = useLofiMode();
+  
 
   const handleChallenge = async () => {
     const trimmedText = inputText.trim();
@@ -66,10 +66,8 @@ export default function CounterargumentCoach() {
 
       setResult(data.result);
       toast({
-        title: ogMode ? "Your opponent has arrived" : "Challenge ready",
-        description: ogMode
-          ? "3 counterarguments are waiting. Can you defend your position?"
-          : "Here's what a strong opponent would say.",
+        title: "Challenge ready",
+        description: "Here's what a strong opponent would say.",
       });
     } catch (error) {
       console.error("Counterargument coach error:", error);
@@ -112,9 +110,7 @@ export default function CounterargumentCoach() {
                     Counterargument Coach
                   </h1>
                   <p className="text-muted-foreground mt-2 text-sm">
-                    {ogMode
-                      ? "Face 3 opponents. Defend your position."
-                      : "See your argument through a challenger's eyes"}
+                    See your argument through a challenger's eyes
                   </p>
                 </div>
               </div>
@@ -152,12 +148,10 @@ export default function CounterargumentCoach() {
                   <div className="max-w-3xl mx-auto">
                     <div className="bg-card rounded-2xl border border-border/50 p-8 md:p-10 shadow-sm">
                       <h2 className="font-display text-xl font-medium text-foreground mb-3">
-                        {ogMode ? "Drop your argument" : "Share your position"}
+                        Share your position
                       </h2>
                       <p className="text-sm text-muted-foreground mb-8 leading-relaxed">
-                        {ogMode
-                          ? "Paste your argument below. We'll throw 3 strong counterarguments at you from different angles — then coach you on how to fight back."
-                          : "Paste a paragraph, essay, or position you want to stress-test. You'll receive counterarguments from logical, ethical, and practical perspectives."}
+                        Paste a paragraph, essay, or position you want to stress-test. You'll receive counterarguments from logical, ethical, and practical perspectives.
                       </p>
 
                       <div className="space-y-5">
@@ -214,7 +208,7 @@ export default function CounterargumentCoach() {
                       transition={{ delay: 0.3, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                       <h3 className="font-display text-sm font-medium text-foreground mb-4">
-                        {ogMode ? "What you're up against" : "How it works"}
+                        How it works
                       </h3>
                       <div className="grid md:grid-cols-3 gap-4 text-sm text-muted-foreground">
                         <div className="flex gap-3">
