@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import ArgumentAutopsy from "./pages/ArgumentAutopsy";
 import CounterargumentCoach from "./pages/CounterargumentCoach";
 import CommandCenter from "./pages/CommandCenter";
+import DebateArena from "./pages/DebateArena";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/autopsy" element={<ProtectedRoute><ArgumentAutopsy /></ProtectedRoute>} />
                 <Route path="/coach" element={<ProtectedRoute><CounterargumentCoach /></ProtectedRoute>} />
                 <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
+                <Route path="/debate" element={<ProtectedRoute><DebateArena /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
