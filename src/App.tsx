@@ -15,6 +15,7 @@ import Auth from "./pages/Auth";
 import ArgumentAutopsy from "./pages/ArgumentAutopsy";
 import CounterargumentCoach from "./pages/CounterargumentCoach";
 import CommandCenter from "./pages/CommandCenter";
+import DebateArena from "./pages/DebateArena";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
