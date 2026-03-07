@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut } from "lucide-react";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -17,13 +18,13 @@ const navLinks = [
 export function Header() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-b border-border/50 transition-all duration-slow">
       <div className="container flex items-center justify-between h-16 px-4 md:px-6">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <motion.div 
+          <motion.div
             className="w-9 h-9 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center transition-all duration-slow group-hover:bg-accent/20"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -35,7 +36,6 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => (
             <Link
@@ -52,15 +52,20 @@ export function Header() {
           ))}
         </nav>
 
-        {/* CTA Button & Theme Toggle */}
         <div className="hidden md:flex items-center gap-3">
           <ThemeToggle />
-          <Button variant="accent" size="sm" className="rounded-xl" asChild>
-            <Link to="/dashboard">Get Started</Link>
-          </Button>
+          {user ? (
+            <Button variant="ghost" size="sm" className="rounded-xl gap-2" onClick={signOut}>
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </Button>
+          ) : (
+            <Button variant="accent" size="sm" className="rounded-xl" asChild>
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          )}
         </div>
 
-        {/* Mobile Menu Button & Toggle */}
         <div className="md:hidden flex items-center gap-1">
           <ThemeToggle />
           <Button
@@ -85,10 +90,9 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div 
+          <motion.div
             className="md:hidden bg-background/95 backdrop-blur-lg border-b border-border/50"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -116,17 +120,22 @@ export function Header() {
                   </Link>
                 </motion.div>
               ))}
-              <motion.div 
+              <motion.div
                 className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
               >
-                <Button variant="accent" className="rounded-xl" asChild>
-                  <Link to="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                    Get Started
-                  </Link>
-                </Button>
+                {user ? (
+                  <Button variant="ghost" className="rounded-xl gap-2" onClick={() => { signOut(); setMobileMenuOpen(false); }}>
+                    <LogOut className="w-4 h-4" />
+                    Sign out
+                  </Button>
+                ) : (
+                  <Button variant="accent" className="rounded-xl" asChild>
+                    <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>Sign in</Link>
+                  </Button>
+                )}
               </motion.div>
             </nav>
           </motion.div>
