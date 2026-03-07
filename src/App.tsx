@@ -6,9 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PaperTexture } from "@/components/ambient/PaperTexture";
 import { Analytics } from "@vercel/analytics/react";
+import { AuthProvider } from "@/hooks/useAuth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
 import Trust from "./pages/Trust";
+import Auth from "./pages/Auth";
 import ArgumentAutopsy from "./pages/ArgumentAutopsy";
 import CounterargumentCoach from "./pages/CounterargumentCoach";
 import CommandCenter from "./pages/CommandCenter";
@@ -18,7 +21,8 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+      <AuthProvider>
         <TooltipProvider>
           <PaperTexture />
           <div className="vignette">
@@ -29,9 +33,10 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/trust" element={<Trust />} />
-                <Route path="/autopsy" element={<ArgumentAutopsy />} />
-                <Route path="/coach" element={<CounterargumentCoach />} />
-                <Route path="/command-center" element={<CommandCenter />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/autopsy" element={<ProtectedRoute><ArgumentAutopsy /></ProtectedRoute>} />
+                <Route path="/coach" element={<ProtectedRoute><CounterargumentCoach /></ProtectedRoute>} />
+                <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -39,6 +44,7 @@ const App = () => (
             <Analytics />
           </div>
         </TooltipProvider>
+      </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );
