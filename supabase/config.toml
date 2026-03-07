@@ -11,3 +11,6 @@ verify_jwt = false
 
  [functions.score-argument]
  verify_jwt = false
+
+ [functions.debate]
+ verify_jwt = false
