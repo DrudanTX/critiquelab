@@ -16,6 +16,7 @@ import ArgumentAutopsy from "./pages/ArgumentAutopsy";
 import CounterargumentCoach from "./pages/CounterargumentCoach";
 import CommandCenter from "./pages/CommandCenter";
 import DebateArena from "./pages/DebateArena";
+import QuickCritique from "./pages/QuickCritique";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/trust" element={<Trust />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/critique" element={<QuickCritique />} />
                 <Route path="/autopsy" element={<ProtectedRoute><ArgumentAutopsy /></ProtectedRoute>} />
                 <Route path="/coach" element={<ProtectedRoute><CounterargumentCoach /></ProtectedRoute>} />
                 <Route path="/command-center" element={<ProtectedRoute><CommandCenter /></ProtectedRoute>} />

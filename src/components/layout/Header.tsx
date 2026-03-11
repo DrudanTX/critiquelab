@@ -7,13 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/autopsy", label: "Argument Autopsy" },
-  { href: "/coach", label: "Counter Coach" },
+  { href: "/dashboard", label: "Home" },
   { href: "/debate", label: "Debate Arena" },
   { href: "/command-center", label: "Command Center" },
-  { href: "/trust", label: "Trust & Integrity" },
+  { href: "/critique", label: "Quick Critique" },
+  { href: "/autopsy", label: "Autopsy" },
+  { href: "/coach", label: "Coach" },
 ];
 
 export function Header() {
