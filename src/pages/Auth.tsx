@@ -39,6 +39,7 @@ export default function Auth() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast({ title: "Welcome back" });
+        navigate(redirectTo, { replace: true });
       } else {
         if (password.length < 8) {
           toast({ title: "Password too short", description: "Use at least 8 characters." });
@@ -50,14 +51,11 @@ export default function Auth() {
           password,
           options: {
             data: { display_name: displayName || email.split("@")[0] },
-            emailRedirectTo: window.location.origin,
           },
         });
         if (error) throw error;
-        toast({
-          title: "Check your email",
-          description: "We sent you a verification link. Please confirm your email to continue.",
-        });
+        toast({ title: "Account created!", description: "You are now signed in." });
+        navigate(redirectTo, { replace: true });
       }
     } catch (error: any) {
       toast({
