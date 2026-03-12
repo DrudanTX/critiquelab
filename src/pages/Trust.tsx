@@ -395,3 +395,21 @@ function GuidelineSection({ title, items, isPositive }: { title: string; items: 
     </div>
   );
 }
+
+function PolicySection({ title, content }: { title: string; content: string[] }) {
+  return (
+    <div className="bg-background rounded-lg border border-border p-6 md:p-8">
+      <h3 className="font-display text-lg font-semibold text-foreground mb-4">
+        {title}
+      </h3>
+      <ul className="space-y-3">
+        {content.map((item, index) => (
+          <li key={index} className="flex items-start gap-3 text-sm">
+            <span className="w-1.5 h-1.5 rounded-full mt-2 shrink-0 bg-accent" />
+            <span className="text-muted-foreground leading-relaxed">{item}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
