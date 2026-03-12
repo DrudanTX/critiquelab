@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useEffect, useRef } from "react";
 import { 
   Shield, 
   Lock, 
@@ -9,7 +10,9 @@ import {
   Eye, 
   Heart,
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  FileText,
+  ScrollText
 } from "lucide-react";
 
 export default function Trust() {
