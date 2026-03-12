@@ -82,21 +82,28 @@ export default function Auth() {
             skipBrowserRedirect: true,
           },
         });
+
         if (error) throw error;
-        if (data?.url) {
-          const oauthUrl = new URL(data.url);
-          const allowedHosts = ["accounts.google.com"];
-          if (!allowedHosts.some((host) => oauthUrl.hostname === host)) {
-            throw new Error("Invalid OAuth redirect URL");
-          }
-          window.location.href = data.url;
+        if (!data?.url) throw new Error("OAuth URL was not returned");
+
+        const oauthUrl = new URL(data.url);
+        const backendAuthHost = new URL(import.meta.env.VITE_SUPABASE_URL).hostname;
+        const isAllowedHost =
+          oauthUrl.protocol === "https:" &&
+          (oauthUrl.hostname === backendAuthHost || oauthUrl.hostname === "accounts.google.com");
+
+        if (!isAllowedHost) {
+          throw new Error("Invalid OAuth redirect URL");
         }
-      } else {
-        const { error } = await lovable.auth.signInWithOAuth("google", {
-          redirect_uri: window.location.origin + "/auth",
-        });
-        if (error) throw error;
+
+        window.location.href = data.url;
+        return;
       }
+
+      const { error } = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin + "/auth",
+      });
+      if (error) throw error;
     } catch (error: any) {
       toast({
         title: "Google sign-in failed",
