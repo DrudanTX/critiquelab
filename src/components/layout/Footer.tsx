@@ -80,12 +80,12 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               <li>
-                <Link to="/trust" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-slow">
+                <Link to="/trust#privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-slow">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/trust" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-slow">
+                <Link to="/trust#terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-slow">
                   Terms of Service
                 </Link>
               </li>
