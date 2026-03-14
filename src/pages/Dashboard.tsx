@@ -14,11 +14,9 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeIn, ScaleOnHover, StaggerContainer, StaggerItem } from "@/components/animations";
-import { useAuth } from "@/hooks/useAuth";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   return (
     <Layout showFooter={false}>
@@ -28,7 +26,7 @@ export default function Dashboard() {
           <FadeIn>
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
-                {user ? "Welcome back" : "Training Hub"}
+                Training Hub
               </h1>
               <p className="text-muted-foreground mt-1">
                 Sharpen your reasoning. Win every argument.
