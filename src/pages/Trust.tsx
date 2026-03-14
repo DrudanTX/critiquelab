@@ -182,10 +182,9 @@ export default function Trust() {
               <PolicySection
                 title="5. Your Rights"
                 content={[
-                  "Access: You can view all data associated with your account at any time through the Command Center.",
-                  "Deletion: You may request complete deletion of your account and all associated data by contacting us.",
-                  "Portability: You may request an export of your data in a machine-readable format.",
-                  "Correction: You can update your profile information at any time.",
+                  "Access: All your data is stored locally in your browser and is accessible to you at any time.",
+                  "Deletion: You can clear your data at any time by clearing your browser's localStorage.",
+                  "No account is required to use CritiqueLab.",
                 ]}
               />
               <PolicySection
