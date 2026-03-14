@@ -177,7 +177,6 @@ export default function Trust() {
                 content={[
                   "We use third-party AI models to generate critiques. Your submissions are sent to these providers for processing but are not stored by them beyond the request lifecycle.",
                   "We use analytics services to understand aggregate usage patterns. These services collect anonymized, non-personally-identifiable data.",
-                  "We use Google OAuth for authentication. Google's use of your data is governed by Google's own Privacy Policy.",
                 ]}
               />
               <PolicySection
