@@ -101,7 +101,7 @@ export function Leaderboard() {
           <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-display text-lg font-semibold text-foreground mb-2">No rankings yet</h3>
           <p className="text-sm text-muted-foreground">
-            Sign up and submit scored arguments to appear on the leaderboard.
+            Submit scored arguments to appear on the leaderboard.
           </p>
         </div>
       </FadeIn>
