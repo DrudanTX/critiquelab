@@ -168,9 +168,8 @@ export default function Trust() {
               <PolicySection
                 title="3. Data Storage & Security"
                 content={[
-                  "Your data is stored on secure, encrypted servers. We use industry-standard security measures including encryption in transit (TLS) and at rest.",
-                  "Access to user data is restricted to essential service operations only.",
-                  "We retain your account data and submission history for as long as your account is active. You may request deletion of your account and all associated data at any time.",
+                  "Your data is stored locally in your browser using localStorage. No account or server-side storage is required.",
+                  "We do not retain personal information on our servers. Your submission history stays on your device.",
                 ]}
               />
               <PolicySection
