@@ -12,13 +12,7 @@ export function Leaderboard() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortBy>("highest_score");
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setCurrentUserId(data.user?.id ?? null);
-    });
-  }, []);
+  const currentUserId: string | null = null;
 
   useEffect(() => {
     fetchLeaderboard();
@@ -107,7 +101,7 @@ export function Leaderboard() {
           <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="font-display text-lg font-semibold text-foreground mb-2">No rankings yet</h3>
           <p className="text-sm text-muted-foreground">
-            Sign up and submit scored arguments to appear on the leaderboard.
+            Submit scored arguments to appear on the leaderboard.
           </p>
         </div>
       </FadeIn>

@@ -149,8 +149,7 @@ export default function Trust() {
               <PolicySection
                 title="1. Information We Collect"
                 content={[
-                  "Account Information: When you create an account, we collect your email address and display name. If you sign in via Google, we receive your name, email, and profile picture from Google.",
-                  "User Content: We collect the text you submit for critique, including arguments, essays, and debate positions. This content is stored securely and associated with your account.",
+                  "User Content: We collect the text you submit for critique, including arguments, essays, and debate positions. This content is stored locally in your browser.",
                   "Usage Data: We collect anonymized usage analytics such as page views and feature usage to improve the service. We do not track individual behavior across third-party sites.",
                   "Device Information: We collect basic device and browser information (e.g., browser type, screen size) for compatibility and debugging purposes.",
                 ]}
@@ -169,9 +168,8 @@ export default function Trust() {
               <PolicySection
                 title="3. Data Storage & Security"
                 content={[
-                  "Your data is stored on secure, encrypted servers. We use industry-standard security measures including encryption in transit (TLS) and at rest.",
-                  "Access to user data is restricted to essential service operations only.",
-                  "We retain your account data and submission history for as long as your account is active. You may request deletion of your account and all associated data at any time.",
+                  "Your data is stored locally in your browser using localStorage. No account or server-side storage is required.",
+                  "We do not retain personal information on our servers. Your submission history stays on your device.",
                 ]}
               />
               <PolicySection
@@ -179,22 +177,20 @@ export default function Trust() {
                 content={[
                   "We use third-party AI models to generate critiques. Your submissions are sent to these providers for processing but are not stored by them beyond the request lifecycle.",
                   "We use analytics services to understand aggregate usage patterns. These services collect anonymized, non-personally-identifiable data.",
-                  "We use Google OAuth for authentication. Google's use of your data is governed by Google's own Privacy Policy.",
                 ]}
               />
               <PolicySection
                 title="5. Your Rights"
                 content={[
-                  "Access: You can view all data associated with your account at any time through the Command Center.",
-                  "Deletion: You may request complete deletion of your account and all associated data by contacting us.",
-                  "Portability: You may request an export of your data in a machine-readable format.",
-                  "Correction: You can update your profile information at any time.",
+                  "Access: All your data is stored locally in your browser and is accessible to you at any time.",
+                  "Deletion: You can clear your data at any time by clearing your browser's localStorage.",
+                  "No account is required to use CritiqueLab.",
                 ]}
               />
               <PolicySection
                 title="6. Cookies"
                 content={[
-                  "We use essential cookies for authentication and session management. We do not use advertising or tracking cookies.",
+                  "We use essential cookies for basic functionality. We do not use advertising or tracking cookies.",
                 ]}
               />
               <PolicySection
