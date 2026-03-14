@@ -190,7 +190,7 @@ export default function Trust() {
               <PolicySection
                 title="6. Cookies"
                 content={[
-                  "We use essential cookies for authentication and session management. We do not use advertising or tracking cookies.",
+                  "We use essential cookies for basic functionality. We do not use advertising or tracking cookies.",
                 ]}
               />
               <PolicySection
