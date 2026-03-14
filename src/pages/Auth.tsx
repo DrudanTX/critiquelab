@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,15 +9,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/animations";
-import { useEffect } from "react";
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [identifier, setIdentifier] = useState(""); // email or username for login
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,13 +29,59 @@ export default function Auth() {
     if (user) navigate(redirectTo, { replace: true });
   }, [user, navigate, redirectTo]);
 
+  const resolveEmail = async (input: string): Promise<string> => {
+    // If it looks like an email, return as-is
+    if (input.includes("@")) return input;
+
+    // Otherwise, look up the email by username
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .ilike("username", input)
+      .maybeSingle();
+
+    if (error || !data) {
+      throw new Error("No account found with that username.");
+    }
+
+    // Get the user's email from a lookup — we need an edge function or
+    // we can use the admin API. Since we can't access auth.users from client,
+    // we'll ask users to use email for now or store email in profiles.
+    // For simplicity, let's just tell users to use their email if username lookup fails.
+    throw new Error("Username login requires email. Please sign in with your email address.");
+  };
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        let loginEmail = identifier;
+        if (!identifier.includes("@")) {
+          // Look up email by username
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .ilike("username", identifier)
+            .maybeSingle();
+
+          if (error || !data) {
+            throw new Error("No account found with that username.");
+          }
+
+          // We need to get the email — let's call an edge function
+          const { data: fnData, error: fnError } = await supabase.functions.invoke("resolve-username", {
+            body: { username: identifier },
+          });
+
+          if (fnError || !fnData?.email) {
+            throw new Error("Could not resolve username. Please use your email to sign in.");
+          }
+          loginEmail = fnData.email;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
         if (error) throw error;
         toast({ title: "Welcome back" });
         navigate(redirectTo, { replace: true });
@@ -46,14 +91,51 @@ export default function Auth() {
           setLoading(false);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        if (username && username.length < 3) {
+          toast({ title: "Username too short", description: "Use at least 3 characters." });
+          setLoading(false);
+          return;
+        }
+        if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
+          toast({ title: "Invalid username", description: "Only letters, numbers, and underscores." });
+          setLoading(false);
+          return;
+        }
+
+        // Check if username is taken
+        if (username) {
+          const { data: existing } = await supabase
+            .from("profiles")
+            .select("id")
+            .ilike("username", username)
+            .maybeSingle();
+          if (existing) {
+            toast({ title: "Username taken", description: "Please choose a different username." });
+            setLoading(false);
+            return;
+          }
+        }
+
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { display_name: displayName || email.split("@")[0] },
+            data: {
+              display_name: displayName || username || email.split("@")[0],
+              username: username || undefined,
+            },
           },
         });
         if (error) throw error;
+
+        // Update profile with username
+        if (username && signUpData.user) {
+          await supabase
+            .from("profiles")
+            .update({ username })
+            .eq("user_id", signUpData.user.id);
+        }
+
         toast({ title: "Account created!", description: "You are now signed in." });
         navigate(redirectTo, { replace: true });
       }
@@ -67,63 +149,15 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    try {
-      const isCustomDomain =
-        !window.location.hostname.includes("lovable.app") &&
-        !window.location.hostname.includes("lovableproject.com");
-
-      if (isCustomDomain) {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo: `${window.location.origin}/auth`,
-            skipBrowserRedirect: true,
-          },
-        });
-
-        if (error) throw error;
-        if (!data?.url) throw new Error("OAuth URL was not returned");
-
-        const oauthUrl = new URL(data.url);
-        const backendAuthHost = new URL(import.meta.env.VITE_SUPABASE_URL).hostname;
-        const isAllowedHost =
-          oauthUrl.protocol === "https:" &&
-          (oauthUrl.hostname === backendAuthHost || oauthUrl.hostname === "accounts.google.com");
-
-        if (!isAllowedHost) {
-          throw new Error("Invalid OAuth redirect URL");
-        }
-
-        window.location.href = data.url;
-        return;
-      }
-
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/auth",
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      toast({
-        title: "Google sign-in failed",
-        description: error.message || "Please try again.",
-      });
-      setGoogleLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <FadeIn>
         <div className="w-full max-w-md space-y-8">
-          {/* Back link */}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-4 h-4" />
             Back to home
           </Link>
 
-          {/* Header */}
           <div>
             <motion.div
               className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center mb-4"
@@ -142,63 +176,62 @@ export default function Auth() {
             </p>
           </div>
 
-          {/* Google OAuth */}
-          <Button
-            variant="outline"
-            className="w-full rounded-xl h-11"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-          >
-            {googleLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : (
-              <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-              </svg>
-            )}
-            Continue with Google
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border/50" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-background px-3 text-muted-foreground">or</span>
-            </div>
-          </div>
-
-          {/* Email form */}
           <form onSubmit={handleEmailAuth} className="space-y-4">
-            {!isLogin && (
+            {isLogin ? (
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-sm">Display name</Label>
+                <Label htmlFor="identifier" className="text-sm">Email or username</Label>
                 <Input
-                  id="displayName"
+                  id="identifier"
                   type="text"
-                  placeholder="Your name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="you@example.com or username"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="rounded-xl h-11"
-                  maxLength={50}
+                  required
                 />
               </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="text-sm">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="your_username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                    className="rounded-xl h-11"
+                    maxLength={30}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">Letters, numbers, and underscores only.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="displayName" className="text-sm">Display name</Label>
+                  <Input
+                    id="displayName"
+                    type="text"
+                    placeholder="Your name"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="rounded-xl h-11"
+                    maxLength={50}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="rounded-xl h-11"
+                    required
+                  />
+                </div>
+              </>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="rounded-xl h-11"
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm">Password</Label>
               <Input
@@ -228,7 +261,6 @@ export default function Auth() {
             </Button>
           </form>
 
-          {/* Toggle */}
           <p className="text-center text-sm text-muted-foreground">
             {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
             <button
