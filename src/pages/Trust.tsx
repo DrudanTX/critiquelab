@@ -149,8 +149,7 @@ export default function Trust() {
               <PolicySection
                 title="1. Information We Collect"
                 content={[
-                  "Account Information: When you create an account, we collect your email address and display name. If you sign in via Google, we receive your name, email, and profile picture from Google.",
-                  "User Content: We collect the text you submit for critique, including arguments, essays, and debate positions. This content is stored securely and associated with your account.",
+                  "User Content: We collect the text you submit for critique, including arguments, essays, and debate positions. This content is stored locally in your browser.",
                   "Usage Data: We collect anonymized usage analytics such as page views and feature usage to improve the service. We do not track individual behavior across third-party sites.",
                   "Device Information: We collect basic device and browser information (e.g., browser type, screen size) for compatibility and debugging purposes.",
                 ]}
