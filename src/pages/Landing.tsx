@@ -109,7 +109,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 md:py-32 bg-card/50">
+      <section className="relative z-10 py-24 md:py-32 bg-card/50">
         <div className="container px-4 md:px-6">
           <FadeIn className="text-center mb-20">
             <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-5">
