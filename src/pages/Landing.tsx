@@ -5,7 +5,7 @@ import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Microscope } fr
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from "@/components/animations";
 import { FloatingOrb } from "@/components/ambient/PaperTexture";
-
+import UnicornScene from "unicornstudio-react";
 const c = {
   badge: "Quiet thinking, sharper writing",
   heroTitle: "Challenge Your Ideas.",
@@ -40,8 +40,18 @@ export default function Landing() {
 
   return (
     <Layout>
+      {/* Unicorn Studio WebGL Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <UnicornScene
+          projectId="GVQm97mKKWDSMri79rF7"
+          sdkUrl="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.5/dist/unicornStudio.umd.js"
+          width="100%"
+          height="100%"
+        />
+      </div>
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden z-10">
         <div className="absolute inset-0 subtle-gradient" />
         
         <FloatingOrb className="top-1/4 -left-20 w-80 h-80 bg-accent/5" delay={0} />
@@ -99,7 +109,7 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 md:py-32 bg-card/50">
+      <section className="relative z-10 py-24 md:py-32 bg-card/50">
         <div className="container px-4 md:px-6">
           <FadeIn className="text-center mb-20">
             <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-5">
@@ -126,7 +136,7 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 md:py-32">
+      <section className="relative z-10 py-24 md:py-32">
         <div className="container px-4 md:px-6">
           <FadeIn className="text-center mb-20">
             <h2 className="text-3xl md:text-4xl font-display font-medium text-foreground mb-5">
@@ -148,7 +158,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 md:py-32 bg-secondary/30 overflow-hidden relative">
+      <section className="relative z-10 py-24 md:py-32 bg-secondary/30 overflow-hidden">
         <FloatingOrb className="-top-20 -right-20 w-80 h-80 bg-accent/10" delay={1} />
         
         <div className="container px-4 md:px-6 text-center relative z-10">
