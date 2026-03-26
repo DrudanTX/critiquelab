@@ -1,11 +1,64 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Microscope } from "lucide-react";
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from "@/components/animations";
 import { FloatingOrb } from "@/components/ambient/PaperTexture";
-import UnicornScene from "unicornstudio-react";
+
+function UnicornBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<any>(null);
+
+  useEffect(() => {
+    let destroyed = false;
+
+    const loadScene = async () => {
+      // Load SDK
+      if (!(window as any).UnicornStudio) {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.5/dist/unicornStudio.umd.js";
+        document.head.appendChild(script);
+        await new Promise<void>((resolve) => { script.onload = () => resolve(); });
+      }
+
+      if (destroyed || !containerRef.current) return;
+
+      try {
+        const scene = await (window as any).UnicornStudio.addScene({
+          elementId: "unicorn-bg",
+          projectId: "GVQm97mKKWDSMri79rF7",
+          scale: 0.75,
+          dpi: 1,
+          fps: 60,
+          lazyLoad: false,
+          production: true,
+        });
+        sceneRef.current = scene;
+      } catch (e) {
+        console.warn("Unicorn Studio failed to load:", e);
+      }
+    };
+
+    loadScene();
+
+    return () => {
+      destroyed = true;
+      sceneRef.current?.destroy();
+    };
+  }, []);
+
+  return (
+    <div
+      id="unicorn-bg"
+      ref={containerRef}
+      className="fixed inset-0 z-0 pointer-events-none [&_a]:!hidden [&_div[style*='position: absolute'][style*='bottom']]:!hidden"
+      style={{ width: "100%", height: "100%" }}
+    />
+  );
+}
+
 const c = {
   badge: "Quiet thinking, sharper writing",
   heroTitle: "Challenge Your Ideas.",
@@ -40,15 +93,7 @@ export default function Landing() {
 
   return (
     <Layout>
-      {/* Unicorn Studio WebGL Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <UnicornScene
-          projectId="GVQm97mKKWDSMri79rF7"
-          sdkUrl="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.5/dist/unicornStudio.umd.js"
-          width="100%"
-          height="100%"
-        />
-      </div>
+      <UnicornBackground />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden z-10">
