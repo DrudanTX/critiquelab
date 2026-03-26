@@ -5,7 +5,7 @@ import { ArrowRight, Shield, Target, Lightbulb, BookOpen, Users, Microscope } fr
 import { motion } from "framer-motion";
 import { FadeIn, StaggerContainer, StaggerItem, ScaleOnHover } from "@/components/animations";
 import { FloatingOrb } from "@/components/ambient/PaperTexture";
-import UnicornScene from "unicornstudio-react";
+
 const c = {
   badge: "Quiet thinking, sharper writing",
   heroTitle: "Challenge Your Ideas.",
