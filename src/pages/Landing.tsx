@@ -148,7 +148,7 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-24 md:py-32 bg-secondary/30 overflow-hidden">
+      <section className="py-24 md:py-32 bg-secondary/30 overflow-hidden relative">
         <FloatingOrb className="-top-20 -right-20 w-80 h-80 bg-accent/10" delay={1} />
         
         <div className="container px-4 md:px-6 text-center relative z-10">
