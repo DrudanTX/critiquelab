@@ -40,18 +40,8 @@ export default function Landing() {
 
   return (
     <Layout>
-      {/* Unicorn Studio WebGL Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <UnicornScene
-          projectId="GVQm97mKKWDSMri79rF7"
-          sdkUrl="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.5/dist/unicornStudio.umd.js"
-          width="100%"
-          height="100%"
-        />
-      </div>
-
       {/* Hero Section */}
-      <section className="relative overflow-hidden z-10">
+      <section className="relative overflow-hidden">
         <div className="absolute inset-0 subtle-gradient" />
         
         <FloatingOrb className="top-1/4 -left-20 w-80 h-80 bg-accent/5" delay={0} />
