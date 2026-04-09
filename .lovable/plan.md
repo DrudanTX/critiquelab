@@ -1,14 +1,20 @@
 
 
-## Plan: Add ads.txt to Site Root
+## Plan: Add Google Analytics (gtag.js) to the Site
 
-Create a `public/ads.txt` file containing the Google AdSense publisher entry. Files in `public/` are served from the site root, so it will be accessible at `https://yourdomain.com/ads.txt`.
+Add the Google Analytics tag to `index.html` right after the `<head>` tag. Since this is a single-page app, there's only one HTML file — all pages will be covered.
 
-### File to create
-- **`public/ads.txt`** with content:
+### Change
+- **`index.html`** — Insert the gtag.js snippet immediately after `<head>`:
+  ```html
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B7NRQYHTT1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B7NRQYHTT1');
+  </script>
   ```
-  google.com, pub-5762820189848327, DIRECT, f08c47fec0942fa0
-  ```
 
-One file, one step — done after publishing.
+One file, one edit.
 
