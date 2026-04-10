@@ -4,11 +4,13 @@ import { FadeIn } from "@/components/animations";
 import { DebateSetup } from "@/components/debate/DebateSetup";
 import { DebateThread } from "@/components/debate/DebateThread";
 import { DebateReport } from "@/components/debate/DebateReport";
+import { SmartFlowView } from "@/components/smart-flow/SmartFlowView";
 import { DebateMessage, DebateOpponent, DebateAnalysis } from "@/types/debate";
 import { useArgumentScores } from "@/hooks/useArgumentScores";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Phase = "setup" | "debate" | "analyzing" | "report";
 
@@ -39,7 +41,6 @@ export default function DebateArena() {
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
 
-    // Check if debate is complete (user sent round 3)
     const isLastRound = currentRound >= 3;
 
     setIsAiThinking(true);
@@ -69,9 +70,7 @@ export default function DebateArena() {
       const allMessages = [...updatedMessages, aiMsg];
       setMessages(allMessages);
 
-      if (isLastRound) {
-        // Debate complete - don't advance round, just wait for user to click "View Report"
-      } else {
+      if (!isLastRound) {
         setCurrentRound((r) => r + 1);
       }
     } catch (e) {
@@ -104,10 +103,9 @@ export default function DebateArena() {
       const a = data.analysis as DebateAnalysis;
       setAnalysis(a);
 
-      // Save score to argument scores for ELO
       const totalScore = a.clarity_score + a.evidence_score + a.logic_score + a.rebuttal_score;
-      const saved = addScore({
-        source: "coach" as const, // debate maps to coach source type
+      addScore({
+        source: "coach" as const,
         inputPreview: `Debate: ${topic} vs ${opponent.name}`,
         totalScore,
         clarityScore: a.clarity_score,
@@ -124,7 +122,6 @@ export default function DebateArena() {
         defenseSuggestion: a.strengths[1] || "Solid rebuttals",
       });
 
-      // Calculate approximate ELO change
       const elo = Math.round(32 * (totalScore / 100 - 0.5));
       setEloChange(elo);
 
@@ -145,11 +142,12 @@ export default function DebateArena() {
   };
 
   const isDebateComplete = currentRound >= 3 && messages.filter((m) => m.role === "ai").length >= 3;
+  const showSmartFlow = (phase === "debate" || phase === "report") && opponent;
 
   return (
     <Layout showFooter={false}>
       <div className="min-h-[calc(100vh-4rem)] bg-background">
-        <div className="container px-4 md:px-6 py-8 max-w-4xl">
+        <div className="container px-4 md:px-6 py-8 max-w-5xl">
           <FadeIn>
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground">
@@ -167,21 +165,6 @@ export default function DebateArena() {
             </FadeIn>
           )}
 
-          {phase === "debate" && opponent && (
-            <FadeIn>
-              <DebateThread
-                topic={topic}
-                opponent={opponent}
-                messages={messages}
-                currentRound={currentRound}
-                isAiThinking={isAiThinking}
-                isComplete={isDebateComplete}
-                onSendMessage={handleSendMessage}
-                onFinish={handleFinish}
-              />
-            </FadeIn>
-          )}
-
           {phase === "analyzing" && (
             <FadeIn>
               <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -191,15 +174,55 @@ export default function DebateArena() {
             </FadeIn>
           )}
 
-          {phase === "report" && analysis && opponent && (
+          {showSmartFlow && (
             <FadeIn>
-              <DebateReport
-                analysis={analysis}
-                opponent={opponent}
-                topic={topic}
-                eloChange={eloChange}
-                onNewDebate={handleNewDebate}
-              />
+              <Tabs defaultValue={phase === "report" ? "report" : "debate"} className="w-full">
+                <TabsList className="mb-4">
+                  {phase === "debate" && (
+                    <TabsTrigger value="debate">💬 Debate</TabsTrigger>
+                  )}
+                  {phase === "report" && analysis && (
+                    <TabsTrigger value="report">📊 Report</TabsTrigger>
+                  )}
+                  <TabsTrigger value="smart-flow">🧠 Smart Flow</TabsTrigger>
+                </TabsList>
+
+                {phase === "debate" && (
+                  <TabsContent value="debate">
+                    <DebateThread
+                      topic={topic}
+                      opponent={opponent}
+                      messages={messages}
+                      currentRound={currentRound}
+                      isAiThinking={isAiThinking}
+                      isComplete={isDebateComplete}
+                      onSendMessage={handleSendMessage}
+                      onFinish={handleFinish}
+                    />
+                  </TabsContent>
+                )}
+
+                {phase === "report" && analysis && (
+                  <TabsContent value="report">
+                    <DebateReport
+                      analysis={analysis}
+                      opponent={opponent}
+                      topic={topic}
+                      eloChange={eloChange}
+                      onNewDebate={handleNewDebate}
+                    />
+                  </TabsContent>
+                )}
+
+                <TabsContent value="smart-flow">
+                  <SmartFlowView
+                    topic={topic}
+                    opponent={opponent}
+                    messages={messages}
+                    isDebateComplete={isDebateComplete}
+                  />
+                </TabsContent>
+              </Tabs>
             </FadeIn>
           )}
         </div>
